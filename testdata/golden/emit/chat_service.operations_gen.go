@@ -25,28 +25,40 @@ func Register(api huma.API, svc *Service) {
 		Method:      "POST",
 		Path:        "/api/operation1",
 		Summary:     "Calls the SOAP operation Operation1",
+		Description: "SOAP operation `Operation1` (SOAP 1.1, document/literal).\n\nSOAP action: `urn:example:ns1PortType1/Operation1`\n\nSOAP faults are mapped to `502 Bad Gateway`, timeouts to `504 Gateway Timeout`.",
 		Tags:        []string{"chat_service"},
+		Errors:      []int{502, 504},
+		Extensions:  map[string]any{"x-soap-action": "urn:example:ns1PortType1/Operation1"},
 	}, svc.handleOperation1)
 	huma.Register(api, huma.Operation{
 		OperationID: "operation2",
 		Method:      "POST",
 		Path:        "/api/operation2",
 		Summary:     "Calls the SOAP operation Operation2",
+		Description: "SOAP operation `Operation2` (SOAP 1.1, document/literal).\n\nSOAP action: `urn:example:ns1PortType1/Operation2`\n\nSOAP faults are mapped to `502 Bad Gateway`, timeouts to `504 Gateway Timeout`.",
 		Tags:        []string{"chat_service"},
+		Errors:      []int{502, 504},
+		Extensions:  map[string]any{"x-soap-action": "urn:example:ns1PortType1/Operation2"},
 	}, svc.handleOperation2)
 	huma.Register(api, huma.Operation{
 		OperationID: "operation3",
 		Method:      "POST",
 		Path:        "/api/operation3",
 		Summary:     "Calls the SOAP operation Operation3",
+		Description: "SOAP operation `Operation3` (SOAP 1.1, document/literal).\n\nSOAP action: `urn:example:ns1PortType1/Operation3`\n\nSOAP faults are mapped to `502 Bad Gateway`, timeouts to `504 Gateway Timeout`.",
 		Tags:        []string{"chat_service"},
+		Errors:      []int{502, 504},
+		Extensions:  map[string]any{"x-soap-action": "urn:example:ns1PortType1/Operation3"},
 	}, svc.handleOperation3)
 	huma.Register(api, huma.Operation{
 		OperationID: "operation4",
 		Method:      "POST",
 		Path:        "/api/operation4",
 		Summary:     "Calls the SOAP operation Operation4",
+		Description: "SOAP operation `Operation4` (SOAP 1.1, document/literal).\n\nSOAP action: `urn:example:ns1PortType1/Operation4`\n\nSOAP faults are mapped to `502 Bad Gateway`, timeouts to `504 Gateway Timeout`.",
 		Tags:        []string{"chat_service"},
+		Errors:      []int{502, 504},
+		Extensions:  map[string]any{"x-soap-action": "urn:example:ns1PortType1/Operation4"},
 	}, svc.handleOperation4)
 }
 

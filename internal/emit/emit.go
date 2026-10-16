@@ -140,6 +140,7 @@ type opView struct {
 	RequestXMLNames   []string
 	ResponseJSONName  string
 	Summary           string
+	Description       string
 	SessionInject     *accessor  // nil when the token must not be injected
 	ChecksState       bool       // response body has a generated CheckState
 	StateTest         *stateTest // fake failing response for the generated test
@@ -228,6 +229,7 @@ func newView(opts Options) (*view, error) {
 			ResponseConverter: lowerCamel(op.Output.GoType) + "FromSOAP",
 			ResponseToSOAP:    lowerCamel(op.Output.GoType) + "ToSOAP",
 			Summary:           summary(op),
+			Description:       opDescription(op),
 		}
 		if session != nil && op.Name != session.LoginName && !contains(cfg.Auth.Login.SkipInject, op.Name) && cfg.Auth.Login.Inject != "" {
 			acc, err := ix.resolvePath(reqType, cfg.Auth.Login.Inject)
@@ -300,6 +302,17 @@ func jsonLiteral(f *model.Field) (string, bool) {
 		return "1", true
 	}
 	return "", false
+}
+
+// opDescription documents the SOAP operation behind the REST endpoint.
+func opDescription(op *model.Operation) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "SOAP operation `%s` (SOAP 1.1, document/literal).\n\n", op.Name)
+	if op.SOAPAction != "" {
+		fmt.Fprintf(&b, "SOAP action: `%s`\n\n", op.SOAPAction)
+	}
+	b.WriteString("SOAP faults are mapped to `502 Bad Gateway`, timeouts to `504 Gateway Timeout`.")
+	return b.String()
 }
 
 func summary(op *model.Operation) string {
@@ -402,10 +415,34 @@ func (v *view) Tags(f *model.Field) string {
 	if f.MaxLength > 0 {
 		tags = append(tags, fmt.Sprintf(`maxLength:"%d"`, f.MaxLength))
 	}
-	if len(f.Enum) > 0 && !strings.Contains(strings.Join(f.Enum, ","), ",") {
+	if len(f.Enum) > 0 && !enumHasComma(f.Enum) {
 		tags = append(tags, fmt.Sprintf(`enum:"%s"`, strings.Join(f.Enum, ",")))
+		if !strings.Contains(f.Enum[0], `"`) {
+			tags = append(tags, fmt.Sprintf(`example:%q`, f.Enum[0]))
+		}
+	}
+	if format := xsdFormat(f); format != "" {
+		tags = append(tags, fmt.Sprintf(`format:%q`, format))
 	}
 	return strings.Join(tags, " ")
+}
+
+func enumHasComma(values []string) bool {
+	for _, v := range values {
+		if strings.Contains(v, ",") {
+			return true
+		}
+	}
+	return false
+}
+
+// xsdFormat maps the soap-go XSD helper types to JSON Schema formats.
+func xsdFormat(f *model.Field) string {
+	base := strings.TrimLeft(f.GoType, "*[]")
+	if base == "soap.XSDDateTime" {
+		return "date-time"
+	}
+	return ""
 }
 
 func (v *view) render(name string) ([]byte, error) {

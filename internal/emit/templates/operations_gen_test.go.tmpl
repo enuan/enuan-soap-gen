@@ -183,14 +183,38 @@ func TestOpenAPI(t *testing.T) {
 		t.Fatalf("GET /openapi.json = %d, want 200: %s", rec.Code, rec.Body.String())
 	}
 	var doc struct {
-		Paths map[string]any `json:"paths"`
+		Paths map[string]struct {
+			Post struct {
+				Description string         `json:"description"`
+				SOAPAction  string         `json:"x-soap-action"`
+				Responses   map[string]any `json:"responses"`
+			} `json:"post"`
+		} `json:"paths"`
 	}
 	if err := json.Unmarshal(rec.Body.Bytes(), &doc); err != nil {
 		t.Fatalf("invalid OpenAPI document: %v", err)
 	}
 {{- range .Operations }}
-	if _, ok := doc.Paths[{{ quote .Path }}]; !ok {
-		t.Errorf("OpenAPI document has no path %s", {{ quote .Path }})
+	{
+		p, ok := doc.Paths[{{ quote .Path }}]
+		if !ok {
+			t.Errorf("OpenAPI document has no path %s", {{ quote .Path }})
+		} else {
+			if p.Post.Description == "" {
+				t.Errorf("OpenAPI operation %s has no description", {{ quote .Path }})
+			}
+			if _, ok := p.Post.Responses["502"]; !ok {
+				t.Errorf("OpenAPI operation %s does not document the 502 fault mapping", {{ quote .Path }})
+			}
+			if _, ok := p.Post.Responses["504"]; !ok {
+				t.Errorf("OpenAPI operation %s does not document the 504 timeout", {{ quote .Path }})
+			}
+{{- if .Operation.SOAPAction }}
+			if p.Post.SOAPAction != {{ quote .Operation.SOAPAction }} {
+				t.Errorf("OpenAPI operation %s has x-soap-action %q, want %q", {{ quote .Path }}, p.Post.SOAPAction, {{ quote .Operation.SOAPAction }})
+			}
+{{- end }}
+		}
 	}
 {{- end }}
 }
