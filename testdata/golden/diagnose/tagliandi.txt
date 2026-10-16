@@ -1,0 +1,10 @@
+service: 
+targetNamespace: urn:example:ns1
+stats: services=1 ports=2 portTypes=1 operations=5 messages=10 bindings=2 soap11=1 soap12=1 http=0 schemas=1 complexTypes=36 simpleTypes=1 elements=10 localElements=142 attributes=0 enumerations=4 complexExtensions=7 nillable=16 unbounded=12
+findings: 6
+info	config-hint/session-field	schema:urn:example:ns1/complexType:BaseRequest/sequence/element:SessionId	field "SessionId" looks like a session/authentication field; configure auth.strategy in soapgen.yaml
+info	config-hint/session-field	schema:urn:example:ns1/complexType:LoginSeviceResult/sequence/element:SessionId	field "SessionId" looks like a session/authentication field; configure auth.strategy in soapgen.yaml
+info	config-hint/state-field	schema:urn:example:ns1/complexType:LoginSeviceResult/sequence/element:LoginState	field "LoginState" looks like an application state/error field; configure error_map in soapgen.yaml
+info	config-hint/state-field	schema:urn:example:ns1/complexType:ResultBase/sequence/element:CodiceErrore	field "CodiceErrore" looks like an application state/error field; configure error_map in soapgen.yaml
+info	config-hint/state-field	schema:urn:example:ns1/complexType:ResultBase/sequence/element:Successo	field "Successo" looks like an application state/error field; configure error_map in soapgen.yaml
+info	info/complex-content-extension	schema:urn:example:ns1	7 complex type(s) use complexContent/extension; base fields are flattened by enuan-soap-go >= v0.29.2-enuan.1

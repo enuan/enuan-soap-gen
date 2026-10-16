@@ -1,0 +1,3595 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="urn:example:ns1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="urn:example:ns2" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="urn:example:ns1" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="urn:example:ns1">
+      <s:element name="Login">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="aziendaName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="clientName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="productName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="LoginResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="LoginResult" type="tns:LoginSeviceResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="LoginSeviceResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="SessionId" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="LoginState" type="tns:LoginStateCode" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorMsg" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="LoginStateCode">
+        <s:restriction base="s:string">
+          <s:enumeration value="SUCCESS" />
+          <s:enumeration value="SESSIONERROR" />
+          <s:enumeration value="POLICYERROR" />
+          <s:enumeration value="AUTHENTICATIONERROR" />
+          <s:enumeration value="GENERIC" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetVersion">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetVersionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetVersionResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetEcho">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:EchoParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="EchoParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Source" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetEchoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetEchoResult" type="tns:EchoResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="EchoResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Echo" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ResultBase">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="state" type="tns:MethodState" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="MethodState">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Code" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetScore">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="showCompleteInfo" nillable="true" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetScoreResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetScoreResult" type="tns:GetScoreResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetScoreResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Company" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Client" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Product" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ActivationDate" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ExpirationDate" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="Credits" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="CreditsSpent" nillable="true" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="PotentialCredits" nillable="true" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="Orders" type="tns:ArrayOfOrderModel" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfOrderModel">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="OrderModel" nillable="true" type="tns:OrderModel" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="OrderModel">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ActivationDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ExpirationDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="StartConsumption" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="EndConsumption" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderNumber" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Credits" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ModuleTreatment" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderStatus" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetMMA">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:MMAParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="MMAParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Marca" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modello" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Versione" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetMMAResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetMMAResult" type="tns:MMAResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="MMAResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Marche" type="tns:ArrayOfMarca" />
+              <s:element minOccurs="0" maxOccurs="1" name="Modelli" type="tns:ArrayOfModello" />
+              <s:element minOccurs="0" maxOccurs="1" name="Versioni" type="tns:ArrayOfVersione" />
+              <s:element minOccurs="0" maxOccurs="1" name="Veicolo" type="tns:Vehicle" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfMarca">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Marca" nillable="true" type="tns:Marca" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Marca">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Desc" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfModello">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Modello" nillable="true" type="tns:Modello" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Modello">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Desc" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfVersione">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Versione" nillable="true" type="tns:Versione" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Versione">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Desc" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Vehicle">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="IniComm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FinComm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Idcar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Nmpor" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Idcom" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cilin" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Potkw" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Idtra" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTDaTarga">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaTargaParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTDaTargaParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTDaTargaResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTDaTargaResult" type="tns:RTDaTargaResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTDaTargaResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DataImmatricolazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimento" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAllestimento">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Allestimento" nillable="true" type="tns:Allestimento" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Allestimento">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTEstesoDaTarga">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaTargaParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRTEstesoDaTargaResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTEstesoDaTargaResult" type="tns:RTEstesoDaTargaResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTEstesoDaTargaResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DataImmatricolazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoEsteso" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAllestimentoEsteso">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoEsteso" nillable="true" type="tns:AllestimentoEsteso" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoEsteso">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Category" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipologiaLink" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IdPar" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTAdditionalDaTarga">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaTargaParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRTAdditionalDaTargaResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTAdditionalDaTargaResult" type="tns:RTAdditionalDaTargaResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTAdditionalDaTargaResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DataImmatricolazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataUltimeRevisione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoEsteso" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetRTDaTargaMin">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTOmTrgMinParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTOmTrgMinParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RicercaAvanzata" nillable="true" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTDaTargaMinResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTDaTargaMinResult" type="tns:RTOmTrgMinResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTOmTrgMinResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="targa" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="tipoVeicolo" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="indicatoreNazionalizzazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="dataPrimaImmatricolazioneItalia" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="dataPrimaImmatricolazioneEstera" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="codiceMotore" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="dataUltimaRevisione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="pdf" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrCode" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrMessage" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoEsteso" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetRTCompletoDaTargaMin">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaTargaParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRTCompletoDaTargaMinResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTCompletoDaTargaMinResult" type="tns:RTCompletoDaTargaResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTCompletoDaTargaResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoVeicolo" type="tns:VehicleType" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="IndicatoreNazionalizzazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneItalia" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneEstera" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataUltimaRevisione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrCode" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrMessage" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoLink" type="tns:LinkType" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoRicerca" type="tns:SearchType" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoCompleto" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:simpleType name="VehicleType">
+        <s:restriction base="s:string">
+          <s:enumeration value="NonDeterminato" />
+          <s:enumeration value="Automobile" />
+          <s:enumeration value="Commerciale" />
+          <s:enumeration value="Moto" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="LinkType">
+        <s:restriction base="s:string">
+          <s:enumeration value="Assente" />
+          <s:enumeration value="ForteUnivoco" />
+          <s:enumeration value="ForteMultiplo" />
+          <s:enumeration value="DeboleUnivoco" />
+          <s:enumeration value="DeboleMultiplo" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="SearchType">
+        <s:restriction base="s:string">
+          <s:enumeration value="NONE" />
+          <s:enumeration value="MINISTERO" />
+          <s:enumeration value="ACI" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfAllestimentoCompleto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoCompleto" nillable="true" type="tns:AllestimentoCompleto" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoCompleto">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:AllestimentoEsteso">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="PotenzaKwDecimal" type="s:decimal" />
+              <s:element minOccurs="1" maxOccurs="1" name="PotenzaKw" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="Alimentazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="TipoVeicolo" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="Element2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaTargaParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Element3">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Element4" type="tns:RTCompletoDaTargaILResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTCompletoDaTargaILResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoVeicolo" type="tns:VehicleTypeIL" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="IndicatoreNazionalizzazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneItalia" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneEstera" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataUltimaRevisione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrCode" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrMessage" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoLink" type="tns:LinkTypeIL" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoRicerca" type="tns:SearchTypeIL" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoCompletoIL" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:simpleType name="VehicleTypeIL">
+        <s:restriction base="s:string">
+          <s:enumeration value="NonDeterminato" />
+          <s:enumeration value="Automobile" />
+          <s:enumeration value="Commerciale" />
+          <s:enumeration value="Moto" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="LinkTypeIL">
+        <s:restriction base="s:string">
+          <s:enumeration value="Assente" />
+          <s:enumeration value="ForteUnivoco" />
+          <s:enumeration value="ForteMultiplo" />
+          <s:enumeration value="DeboleUnivoco" />
+          <s:enumeration value="DeboleMultiplo" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="SearchTypeIL">
+        <s:restriction base="s:string">
+          <s:enumeration value="NONE" />
+          <s:enumeration value="MINISTERO" />
+          <s:enumeration value="ACI" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfAllestimentoCompletoIL">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoCompletoIL" nillable="true" type="tns:AllestimentoCompletoIL" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoCompletoIL">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:AllestimentoEstesoIL">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="PotenzaKw" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="Alimentazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="TipoVeicolo" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="AllestimentoEstesoIL">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element5" type="tns:ArrayOfILItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfILItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ILItem" type="tns:ILItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ILItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipologiaLink" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTCompletoDaTargaMinTecDoc">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaTargaParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRTCompletoDaTargaMinTecDocResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTCompletoDaTargaMinTecDocResult" type="tns:RTCompletoDaTargaTecDocResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTCompletoDaTargaTecDocResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoVeicolo" type="tns:VehicleType" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="IndicatoreNazionalizzazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneItalia" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneEstera" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataUltimaRevisione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrCode" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrMessage" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoLink" type="tns:LinkType" />
+              <s:element minOccurs="1" maxOccurs="1" name="TipoRicerca" type="tns:SearchType" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoCompletoTecDoc" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAllestimentoCompletoTecDoc">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoCompletoTecDoc" nillable="true" type="tns:AllestimentoCompletoTecDoc" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoCompletoTecDoc">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="PotenzaKw" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Alimentazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoVeicolo" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="KType" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTCompletoDaTargaMinTecDocSingolo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaTargaParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRTCompletoDaTargaMinTecDocSingoloResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTCompletoDaTargaMinTecDocSingoloResult" type="tns:RTCompletoDaTargaTecDocResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRicambiDBRT">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:IdparSearchParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="IdparSearchParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Marca" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modello" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Versione" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodLingua" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Idpars" type="tns:ArrayOfInt" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfInt">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Idpar" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRicambiDBRTResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRicambiDBRTResult" type="tns:IdparSearchResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="IdparSearchResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DBRT_Parts" type="tns:ArrayOfDBRT_Part" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfDBRT_Part">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="DBRT_Part" nillable="true" type="tns:DBRT_Part" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DBRT_Part">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Idpar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Idsim" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="VariantiListino" type="tns:ArrayOfVarianteListino" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfVarianteListino">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="VarianteListino" nillable="true" type="tns:VarianteListino" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="VarianteListino">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Dspar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parno" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Ultds" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Pecos" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Color" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Przli" type="s:decimal" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetMecRepairTime">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:TempiParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TempiParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Idmar" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Idmod" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Idver" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Idpar" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetMecRepairTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetMecRepairTimeResult" type="tns:TempiResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TempiResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="Idpar" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="Time" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="IncJobs" type="tns:ArrayOfIncjob" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfIncjob">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Incjob" nillable="true" type="tns:Incjob" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Incjob">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="TextLeft" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TextRight" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetUpdateListini">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:ListiniParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ListiniParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Ricambi" type="tns:ArrayOfRicambioReq" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfRicambioReq">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioReq" nillable="true" type="tns:RicambioReq" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioReq">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdPar" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="OE" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdRiga" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetUpdateListiniResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetUpdateListiniResult" type="tns:ListiniResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ListiniResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Ricambi" type="tns:ArrayOfRicambioRes" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfRicambioRes">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioRes" nillable="true" type="tns:RicambioRes" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioRes">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdPar" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="OE" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdRiga" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Prezzo" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataValiditaListino" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataAggiornamentoListino" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FlagManuale" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Stato" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRicambiByOE">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:OESearchParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="OESearchParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Marca" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Modello" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Versione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ShowCategory" nillable="true" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Oelist" type="tns:ArrayOfString1" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString1">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="OE" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRicambiByOEResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRicambiByOEResult" type="tns:OESearchResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="OESearchResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="SparePart_OEList" type="tns:ArrayOfSparePart_OE" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfSparePart_OE">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SparePart_OE" nillable="true" type="tns:SparePart_OE" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SparePart_OE">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="OE" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SparePartInfos" type="tns:ArrayOfSparePartInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSparePartInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SparePartInfo" nillable="true" type="tns:SparePartInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SparePartInfo">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Idpar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Dspar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Idsim" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Category" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OEList" type="tns:ArrayOfOEDetail" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfOEDetail">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="OEDetail" nillable="true" type="tns:OEDetail" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="OEDetail">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Parno" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Ultds" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Pecos" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Color" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetListiniEquivalenti">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:ListiniEquiParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ListiniEquiParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="PartNumber" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetListiniEquivalentiResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetListiniEquivalentiResult" type="tns:ListiniEquiResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ListiniEquiResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Ricambi" type="tns:ArrayOfRicambioEquiRes" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfRicambioEquiRes">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioEquiRes" nillable="true" type="tns:RicambioEquiRes" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioEquiRes">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="PartNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Prezzo" type="s:decimal" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchListiniByOe">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:SearchListiniParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchListiniParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Oe" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="idMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Top" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchListiniByOeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchListiniByOeResult" type="tns:SearchListiniResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchListiniResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Ricambi" type="tns:ArrayOfSearchRicambioRes" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfSearchRicambioRes">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchRicambioRes" nillable="true" type="tns:SearchRicambioRes" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchRicambioRes">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="OE" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdRiga" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Prezzo" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataValiditaListino" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataAggiornamentoListino" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FlagManuale" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Stato" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchRTByOe">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:SearchRTByOeParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchRTByOeParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Oe" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Top" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ShowCategory" nillable="true" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="ShowIdPar" nillable="true" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchRTByOeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchRTByOeResult" type="tns:RTEstesoByOeResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTEstesoByOeResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DataImmatricolazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoRes" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAllestimentoRes">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoRes" nillable="true" type="tns:AllestimentoRes" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoRes">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Category" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipologiaLink" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OE" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IdPar" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetPartNumberSostituenti">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RicambiSostParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RicambiSostParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="IdMarca" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PartNumber" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetPartNumberSostituentiResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetPartNumberSostituentiResult" type="tns:RicambiSostResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RicambiSostResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="PartNumbers" type="tns:ArrayOfRicambioSost" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfRicambioSost">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioSost" nillable="true" type="tns:RicambioSost" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioSost">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="IdGruppo" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PartNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Data" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTDaOmologazione">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaOmologazioneParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTDaOmologazioneParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceOmologazione" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRTDaOmologazioneResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRTDaOmologazioneResult" type="tns:RTDaOmologazioneResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTDaOmologazioneResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="CodiceOmologazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoDaOmologazione" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAllestimentoDaOmologazione">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoDaOmologazione" nillable="true" type="tns:AllestimentoDaOmologazione" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoDaOmologazione">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TipologiaLink" type="tns:OmLinkType" />
+          <s:element minOccurs="1" maxOccurs="1" name="PotenzaKwDecimal" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="PotenzaKw" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Alimentazione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TipoVeicolo" type="tns:OmVehicleType" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiciMotore" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="OmLinkType">
+        <s:restriction base="s:string">
+          <s:enumeration value="Assente" />
+          <s:enumeration value="Forte" />
+          <s:enumeration value="Debole" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="OmVehicleType">
+        <s:restriction base="s:string">
+          <s:enumeration value="NonDeterminato" />
+          <s:enumeration value="Automobile" />
+          <s:enumeration value="Commerciale" />
+          <s:enumeration value="Moto" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="Element6">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTDaOmologazioneLIParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTDaOmologazioneLIParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceOmologazione" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Element7">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Element8" type="tns:RTDaOmologazioneLIResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTDaOmologazioneLIResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="CodiceOmologazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoDaOmologazioneLI" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAllestimentoDaOmologazioneLI">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoDaOmologazioneLI" nillable="true" type="tns:AllestimentoDaOmologazioneLI" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoDaOmologazioneLI">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="PotenzaKw" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Alimentazione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TipoVeicolo" type="tns:OmVehicleTypeLI" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiciMotore" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element5" type="tns:ArrayOfILItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="OmVehicleTypeLI">
+        <s:restriction base="s:string">
+          <s:enumeration value="NonDeterminato" />
+          <s:enumeration value="Automobile" />
+          <s:enumeration value="Commerciale" />
+          <s:enumeration value="Moto" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetDatiTecniciDaRT">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:DatiTecniciDaRTParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="DatiTecniciDaRTParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMarca" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdModello" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVersione" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetDatiTecniciDaRTResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDatiTecniciDaRTResult" type="tns:DatiTecniciDaRTResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="DatiTecniciDaRTResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Dati" type="tns:ArrayOfDatoDatiTecnici" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfDatoDatiTecnici">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="DatoDatiTecnici" nillable="true" type="tns:DatoDatiTecnici" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DatoDatiTecnici">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="descrizioneMarca" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="descrizioneModello" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="descrizioneAllestimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="inizioImm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="fineImm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="inizioComm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="fineComm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="descrizioneCompletaAllestimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="dataRegistrazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="motore" type="tns:Motore" />
+          <s:element minOccurs="0" maxOccurs="1" name="corpoVettura" type="tns:CorpoVettura" />
+          <s:element minOccurs="0" maxOccurs="1" name="trasmissione" type="tns:Trasmissione" />
+          <s:element minOccurs="0" maxOccurs="1" name="dimensioniMasse" type="tns:DimensioniMasse" />
+          <s:element minOccurs="0" maxOccurs="1" name="prestazioni" type="tns:Prestazioni" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ExtensionDataObject" />
+      <s:complexType name="Motore">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="alimentazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sovralimentazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="cilindrata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="potenza" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="potenzaCavalli" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="potenzaMaxGiriMinuto" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="coppiaKg" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="coppiaN" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="coppiaMaxGiriMinuto" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="numeroCilindri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="disposizioneCilindri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="valvolePerCilindro" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="catalizzata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="tipoCatalizzatore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="normativa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="potenzaFiscale" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="CorpoVettura">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="carrozzeria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="numeroPosti" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="numeroPostiStimato" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="numeroPorte" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaSerbatoio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaSerbatoioStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="tetto" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Trasmissione">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="trazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="cambio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="numeroMarce" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DimensioniMasse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="altezzaMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="altezzaMetriStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="lunghezzaMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="lunghezzaMetriStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="larghezzaMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="larghezzaMetriStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="passoMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="masseKG" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="masseKgStimate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="massaKgDa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="massaKgDaStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="massaKgA" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="massaKgAStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="rapportoPotenzaMasse" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="massaRimorchiabile" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="massaRimorchiabileStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="portataKgDa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="portataKgDaStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="portataKgA" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="portataKgAStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaBagagliao1dm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaBagagliao1dmStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaBagagliao2dm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaBagagliao2dmStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaBagagliao3dm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="capacitaBagagliao3dmStimata" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Prestazioni">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="velocitaMax" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="velocitaMaxStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="accelerazione0100" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="accelerazione0100Stimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="consumo" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="consumoUrbano" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="consumoUrbanoStimato" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="consumoExtraUrbano" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="consumoExtraUrbanoStimato" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="consumoMisto" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="consumoMistoStimato" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="emissioneExtraUrbano" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="emissioneExtraUrbanoStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="emissioneUrbano" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="emissioneUrbanoStimata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="emissioneMisto" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="emissioneMistoStimata" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Element9">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:Type1" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Type1">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Element10">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Element11" type="tns:Type2" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Type2">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Dati" type="tns:DatoDatiTecnici" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetDatiTecniciDaInfobike">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:DatiTecniciDaInfobikeParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="DatiTecniciDaInfobikeParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceInfobikePRG" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="VociTecniche" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetDatiTecniciDaInfobikeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDatiTecniciDaInfobikeResult" type="tns:DatiTecniciDaInfobikeResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="DatiTecniciDaInfobikeResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DatoAnagrafica" type="tns:DatoAnagraficaMoto" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiTecniciBase" type="tns:DatiTecniciBaseMoto" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiTecniciFreni" type="tns:ArrayOfDatiTecniciFreniMoto" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiTecniciPneumatici" type="tns:ArrayOfDatiTecniciPneumaticiMoto" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiRicambi" type="tns:ArrayOfDatiRicambi" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="DatoAnagraficaMoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceAllestimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceInfobikePRG" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceMarca" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceModello" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneAllestimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneCompleta" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneMarca" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneModello" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineImmatricolazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineVendita" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioImmatricolazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioVendita" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ModelYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProgressivoAllestimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoVeicolo" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DatiTecniciBaseMoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="AltezzaSellaMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cambio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CapacitaSerbatoio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cilindrata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CoppiaKgm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CoppiaMaxGiriMinuto" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CoppiaNm" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneCompletaAllestimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DisposizioneCilindri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LarghezzaMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LunghezzaMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MassaKG" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Normativa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroCilindri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="NumeroMarce" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PassoMetri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PotenzaCV" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PotenzaKW" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PotenzaMaxGiriMinuto" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoCicloMotore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoVeicoloCodice" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoVeicoloDescrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValvolePerCilindro" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfDatiTecniciFreniMoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="DatiTecniciFreniMoto" nillable="true" type="tns:DatiTecniciFreniMoto" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DatiTecniciFreniMoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="PosizioneFreno" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoFreno" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfDatiTecniciPneumaticiMoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="DatiTecniciPneumaticiMoto" nillable="true" type="tns:DatiTecniciPneumaticiMoto" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DatiTecniciPneumaticiMoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneMisurePneumatico" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DiametroCalettamento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PosizionePneumatico" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfDatiRicambi">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="DatiRicambi" nillable="true" type="tns:DatiRicambi" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DatiRicambi">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Quantita" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdPar" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Specifiche" type="tns:ArrayOfSpecifiche" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSpecifiche">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Specifiche" nillable="true" type="tns:Specifiche" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Specifiche">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Qualificatore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Valore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Quantita" nillable="true" type="s:double" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetImmagine">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:EPictureParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="EPictureParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Codice" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetImmagineResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetImmagineResult" type="tns:PictureResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PictureResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="ImmaginiList" type="tns:ArrayOfImmagine" />
+              <s:element minOccurs="0" maxOccurs="1" name="Codice" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfImmagine">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Immagine" nillable="true" type="tns:Immagine" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Immagine">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Nome" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Img" type="s:base64Binary" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetPneumatici">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:PneumaticiParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PneumaticiParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetPneumaticiResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetPneumaticiResult" type="tns:PneumaticiResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PneumaticiResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="PneumaticiList" type="tns:ArrayOfPneumatico" />
+              <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfPneumatico">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Pneumatico" nillable="true" type="tns:Pneumatico" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Pneumatico">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="tipoxx" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="treno" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="tirupo" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="codtpn" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="largmm" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="largpo" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="spalla" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="diamto" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="indcar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="indvel" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="indvels" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="diampo" type="s:double" />
+          <s:element minOccurs="1" maxOccurs="1" name="diamme" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="presta" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="carvcl" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="pneuma" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetKType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:Type3" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Type3">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Element12" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMarca" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdModello" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVersione" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetKTypeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetKTypeResult" type="tns:Type4" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Type4">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="KType" type="tns:ArrayOfString" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="CheckEurocodeDaTargaOE">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTEurocodeDaTargaOEParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTEurocodeDaTargaOEParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Oe" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Eurocode" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CheckEurocodeDaTargaOEResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CheckEurocodeDaTargaOEResult" type="tns:RTEurocodeDaTargaOEResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTEurocodeDaTargaOEResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Eurocode" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Oe" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="Prezzo" type="s:decimal" />
+              <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetIdParBDRT">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:IdParBDRTParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="IdParBDRTParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Marca" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modello" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Versione" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Pratica" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetIdParBDRTResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetIdParBDRTResult" type="tns:IdParBDRTResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="IdParBDRTResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Pratica" nillable="true" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DBRT_Parts" type="tns:ArrayOfInt1" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfInt1">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="int" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CheckRicambiFromVin">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:CheckRicambiFromVinParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CheckRicambiFromVinParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="RicambiOE" type="tns:ArrayOfRicambioOE" />
+          <s:element minOccurs="0" maxOccurs="1" name="vin" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfRicambioOE">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioOE" nillable="true" type="tns:RicambioOE" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioOE">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="listaOE" type="tns:ArrayOfCodiciOE" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfCodiciOE">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CodiciOE" nillable="true" type="tns:CodiciOE" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="CodiciOE">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="oe" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="idpar" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CheckRicambiFromVinResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CheckRicambiFromVinResult" type="tns:CheckRicambiFromVinResultOfListOfRicambioOEResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CheckRicambiFromVinResultOfListOfRicambioOEResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="Success" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="ResultCode" type="tns:ResultCode" />
+              <s:element minOccurs="1" maxOccurs="1" name="idmar" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="idmod" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="idver" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="Marca" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Modello" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Versione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="MVS" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Data" type="tns:ArrayOfRicambioOEResult" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:simpleType name="ResultCode">
+        <s:restriction base="s:string">
+          <s:enumeration value="WARN" />
+          <s:enumeration value="OK" />
+          <s:enumeration value="AUTHENTICATION_ERROR" />
+          <s:enumeration value="INPUT_ERROR" />
+          <s:enumeration value="METHOD_ERROR" />
+          <s:enumeration value="METHOD_ERROR_NON_GESTITO" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfRicambioOEResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioOEResult" nillable="true" type="tns:RicambioOEResult" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioOEResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="lato" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="listaOE" type="tns:ArrayOfCodiciOEResult" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfCodiciOEResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CodiciOEResult" nillable="true" type="tns:CodiciOEResult" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="CodiciOEResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="inputOE" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="inputIdpar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ricambioOE" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="sostitutoOE" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ricambioDescrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ricambioValido" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetCategorieBDRT">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:CategorieBDRTParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CategorieBDRTParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Marca" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modello" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Versione" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodLingua" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetCategorieBDRTResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetCategorieBDRTResult" type="tns:CategorieBDRTResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CategorieBDRTResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Categorie" type="tns:ArrayOfString" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="CheckEurocodeDaTargaOE2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:RTEurocodeDaTargaOEListParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTEurocodeDaTargaOEListParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Oe" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Eurocode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RicercaVin" nillable="true" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CheckEurocodeDaTargaOE2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CheckEurocodeDaTargaOE2Result" type="tns:RTEurocodeDaTargaOEListResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTEurocodeDaTargaOEListResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Items" type="tns:ArrayOfItem" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Item" nillable="true" type="tns:Item" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Item">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Eurocode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Oe" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Prezzo" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Dspar" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetIdParBDRTCompleto">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:IdParBDRTCompletoParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="IdParBDRTCompletoParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Marca" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modello" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Versione" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Categoria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodLingua" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Pratica" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetIdParBDRTCompletoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetIdParBDRTCompletoResult" type="tns:IdParBDRTCompletoResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="IdParBDRTCompletoResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="Marca" nillable="true" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Modello" nillable="true" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Versione" nillable="true" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="Pratica" nillable="true" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DBRT_Parts" type="tns:ArrayOfParts" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfParts">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="parts" nillable="true" type="tns:parts" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="parts">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="idpar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="simmetria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="descrizione" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetGruppiBDRT">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:GruppiBDRTParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GruppiBDRTParamContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Marca" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modello" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Versione" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Categoria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodLingua" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetGruppiBDRTResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGruppiBDRTResult" type="tns:GruppiBDRTResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GruppiBDRTResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Gruppi" type="tns:ArrayOfString" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="SearchListiniCompletoByOe">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:SearchListiniCompletoParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchListiniCompletoParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Oe" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="idMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Top" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="SoloOrdinabili" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchListiniCompletoByOeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchListiniCompletoByOeResult" type="tns:SearchListiniCompletoResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchListiniCompletoResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Ricambi" type="tns:ArrayOfSearchRicambioCompletoRes" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfSearchRicambioCompletoRes">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchRicambioCompletoRes" nillable="true" type="tns:SearchRicambioCompletoRes" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchRicambioCompletoRes">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="OE" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdRiga" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Prezzo" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataValiditaListino" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataAggiornamentoListino" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FlagManuale" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Stato" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Ordinabile" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchKtypeByOe">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:SearchKtypeByOeParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchKtypeByOeParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="PartNumber" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchKtypeByOeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchKtypeByOeResult" type="tns:SearchKtypeByOeResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SearchKtypeByOeResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="KtypeList" type="tns:ArrayOfKtype" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfKtype">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Ktype" nillable="true" type="tns:Ktype" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Ktype">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="PartNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="KType" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="BaseResultInternalOfRTOmTrgMinResultRTOmTrgMinInternalResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Data" type="tns:RTOmTrgMinResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataInternal" type="tns:RTOmTrgMinInternalResult" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RTOmTrgMinInternalResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceOmologazione" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RTDaTargaMinAvanzataParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RTDaTargaMinAvanzataResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DatiCodifica" type="tns:DatiCodifica" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiOmologazione" type="tns:DatiOmologazione" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiTecnici" type="tns:DatiTecnici" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrCode" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrMessage" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoEsteso" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="DatiCodifica">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceCasa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element13" type="tns:Type5" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizioni" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="Trim" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Type5">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Element14" nillable="true" type="tns:Type6" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Type6">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Categoria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceInfoBikePRG" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineImmatricolazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioImmatricolazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioVendita" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineVendita" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Rating" type="s:decimal" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DatiOmologazione">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceOmologazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneEstera" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazioneItalia" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataUltimaRevisione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IndicatoreNazionalizzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProvinciaImmatricolazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataRichiesta" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoVeicolo" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="DatiTecnici">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Alimentazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CO2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Carrozzeria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cilindrata" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClasseEuro" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceAlimentazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceCarrozzeria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneCambio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Id" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Massa" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Posti" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Potenza" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="StartStop" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoCambio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoVeicolo" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RTDaTelaioAvanzataParamContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RTDaTelaioAvanzataResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DatiCodifica" type="tns:DatiCodifica" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiOmologazione" type="tns:DatiOmologazione" />
+              <s:element minOccurs="0" maxOccurs="1" name="DatiTecnici" type="tns:DatiTecnici" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrCode" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AllestimentiErrMessage" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoEsteso" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetRtFromInfobike">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:GetRtFromInfoBikeContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetRtFromInfoBikeContext">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="InfoBikeCode" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRtFromInfobikeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRtFromInfobikeResult" type="tns:GetRtFromInfoResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetRtFromInfoResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimento" type="tns:AllestimentoEsteso" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="Element15">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:Type7" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Type7">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Element12" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Element16">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Element17" type="tns:GetRtFromInfoResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetSvg">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:GetSvgContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetSvgContext">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Marca" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modello" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Versione" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Idpar" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetSvgResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetSvgResult" type="tns:GetSvgResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetSvgResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Svg" type="tns:ArrayOfSvgContent" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfSvgContent">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SvgContent" nillable="true" type="tns:SvgContent" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SvgContent">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Filename" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Content" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Element18">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:SearchRTByOeParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Element19">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Element20" type="tns:RTAllestimentoEstesoByOeResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RTAllestimentoEstesoByOeResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="DataImmatricolazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Allestimenti" type="tns:ArrayOfAllestimentoEstesoMultiInfoCode" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAllestimentoEstesoMultiInfoCode">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AllestimentoEstesoMultiInfoCode" nillable="true" type="tns:AllestimentoEstesoMultiInfoCode" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AllestimentoEstesoMultiInfoCode">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Category" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMar" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdMod" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdVer" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineCommercializzazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsMod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DsVer" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipologiaLink" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IdPar" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SearchInfobikeByOE">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sessionId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:SearchRTByOeParamContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchInfobikeByOEResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchInfobikeByOEResult" type="tns:RTAllestimentoEstesoByOeResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="Message1">
+    <wsdl:part name="parameters" element="tns:Login" />
+  </wsdl:message>
+  <wsdl:message name="Message2">
+    <wsdl:part name="parameters" element="tns:LoginResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message3">
+    <wsdl:part name="parameters" element="tns:GetVersion" />
+  </wsdl:message>
+  <wsdl:message name="Message4">
+    <wsdl:part name="parameters" element="tns:GetVersionResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message5">
+    <wsdl:part name="parameters" element="tns:GetEcho" />
+  </wsdl:message>
+  <wsdl:message name="Message6">
+    <wsdl:part name="parameters" element="tns:GetEchoResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message7">
+    <wsdl:part name="parameters" element="tns:GetScore" />
+  </wsdl:message>
+  <wsdl:message name="Message8">
+    <wsdl:part name="parameters" element="tns:GetScoreResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message9">
+    <wsdl:part name="parameters" element="tns:GetMMA" />
+  </wsdl:message>
+  <wsdl:message name="Message10">
+    <wsdl:part name="parameters" element="tns:GetMMAResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message11">
+    <wsdl:part name="parameters" element="tns:GetRTDaTarga" />
+  </wsdl:message>
+  <wsdl:message name="Message12">
+    <wsdl:part name="parameters" element="tns:GetRTDaTargaResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message13">
+    <wsdl:part name="parameters" element="tns:GetRTEstesoDaTarga" />
+  </wsdl:message>
+  <wsdl:message name="Message14">
+    <wsdl:part name="parameters" element="tns:GetRTEstesoDaTargaResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message15">
+    <wsdl:part name="parameters" element="tns:GetRTAdditionalDaTarga" />
+  </wsdl:message>
+  <wsdl:message name="Message16">
+    <wsdl:part name="parameters" element="tns:GetRTAdditionalDaTargaResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message17">
+    <wsdl:part name="parameters" element="tns:GetRTDaTargaMin" />
+  </wsdl:message>
+  <wsdl:message name="Message18">
+    <wsdl:part name="parameters" element="tns:GetRTDaTargaMinResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message19">
+    <wsdl:part name="parameters" element="tns:GetRTCompletoDaTargaMin" />
+  </wsdl:message>
+  <wsdl:message name="Message20">
+    <wsdl:part name="parameters" element="tns:GetRTCompletoDaTargaMinResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message21">
+    <wsdl:part name="parameters" element="tns:Element2" />
+  </wsdl:message>
+  <wsdl:message name="Message22">
+    <wsdl:part name="parameters" element="tns:Element3" />
+  </wsdl:message>
+  <wsdl:message name="Message23">
+    <wsdl:part name="parameters" element="tns:GetRTCompletoDaTargaMinTecDoc" />
+  </wsdl:message>
+  <wsdl:message name="Message24">
+    <wsdl:part name="parameters" element="tns:GetRTCompletoDaTargaMinTecDocResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message25">
+    <wsdl:part name="parameters" element="tns:GetRTCompletoDaTargaMinTecDocSingolo" />
+  </wsdl:message>
+  <wsdl:message name="Message26">
+    <wsdl:part name="parameters" element="tns:GetRTCompletoDaTargaMinTecDocSingoloResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message27">
+    <wsdl:part name="parameters" element="tns:GetRicambiDBRT" />
+  </wsdl:message>
+  <wsdl:message name="Message28">
+    <wsdl:part name="parameters" element="tns:GetRicambiDBRTResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message29">
+    <wsdl:part name="parameters" element="tns:GetMecRepairTime" />
+  </wsdl:message>
+  <wsdl:message name="Message30">
+    <wsdl:part name="parameters" element="tns:GetMecRepairTimeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message31">
+    <wsdl:part name="parameters" element="tns:GetUpdateListini" />
+  </wsdl:message>
+  <wsdl:message name="Message32">
+    <wsdl:part name="parameters" element="tns:GetUpdateListiniResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message33">
+    <wsdl:part name="parameters" element="tns:GetRicambiByOE" />
+  </wsdl:message>
+  <wsdl:message name="Message34">
+    <wsdl:part name="parameters" element="tns:GetRicambiByOEResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message35">
+    <wsdl:part name="parameters" element="tns:GetListiniEquivalenti" />
+  </wsdl:message>
+  <wsdl:message name="Message36">
+    <wsdl:part name="parameters" element="tns:GetListiniEquivalentiResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message37">
+    <wsdl:part name="parameters" element="tns:SearchListiniByOe" />
+  </wsdl:message>
+  <wsdl:message name="Message38">
+    <wsdl:part name="parameters" element="tns:SearchListiniByOeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message39">
+    <wsdl:part name="parameters" element="tns:SearchRTByOe" />
+  </wsdl:message>
+  <wsdl:message name="Message40">
+    <wsdl:part name="parameters" element="tns:SearchRTByOeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message41">
+    <wsdl:part name="parameters" element="tns:GetPartNumberSostituenti" />
+  </wsdl:message>
+  <wsdl:message name="Message42">
+    <wsdl:part name="parameters" element="tns:GetPartNumberSostituentiResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message43">
+    <wsdl:part name="parameters" element="tns:GetRTDaOmologazione" />
+  </wsdl:message>
+  <wsdl:message name="Message44">
+    <wsdl:part name="parameters" element="tns:GetRTDaOmologazioneResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message45">
+    <wsdl:part name="parameters" element="tns:Element6" />
+  </wsdl:message>
+  <wsdl:message name="Message46">
+    <wsdl:part name="parameters" element="tns:Element7" />
+  </wsdl:message>
+  <wsdl:message name="Message47">
+    <wsdl:part name="parameters" element="tns:GetDatiTecniciDaRT" />
+  </wsdl:message>
+  <wsdl:message name="Message48">
+    <wsdl:part name="parameters" element="tns:GetDatiTecniciDaRTResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message49">
+    <wsdl:part name="parameters" element="tns:Element9" />
+  </wsdl:message>
+  <wsdl:message name="Message50">
+    <wsdl:part name="parameters" element="tns:Element10" />
+  </wsdl:message>
+  <wsdl:message name="Message51">
+    <wsdl:part name="parameters" element="tns:GetDatiTecniciDaInfobike" />
+  </wsdl:message>
+  <wsdl:message name="Message52">
+    <wsdl:part name="parameters" element="tns:GetDatiTecniciDaInfobikeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message53">
+    <wsdl:part name="parameters" element="tns:GetImmagine" />
+  </wsdl:message>
+  <wsdl:message name="Message54">
+    <wsdl:part name="parameters" element="tns:GetImmagineResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message55">
+    <wsdl:part name="parameters" element="tns:GetPneumatici" />
+  </wsdl:message>
+  <wsdl:message name="Message56">
+    <wsdl:part name="parameters" element="tns:GetPneumaticiResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message57">
+    <wsdl:part name="parameters" element="tns:GetKType" />
+  </wsdl:message>
+  <wsdl:message name="Message58">
+    <wsdl:part name="parameters" element="tns:GetKTypeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message59">
+    <wsdl:part name="parameters" element="tns:CheckEurocodeDaTargaOE" />
+  </wsdl:message>
+  <wsdl:message name="Message60">
+    <wsdl:part name="parameters" element="tns:CheckEurocodeDaTargaOEResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message61">
+    <wsdl:part name="parameters" element="tns:GetIdParBDRT" />
+  </wsdl:message>
+  <wsdl:message name="Message62">
+    <wsdl:part name="parameters" element="tns:GetIdParBDRTResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message63">
+    <wsdl:part name="parameters" element="tns:CheckRicambiFromVin" />
+  </wsdl:message>
+  <wsdl:message name="Message64">
+    <wsdl:part name="parameters" element="tns:CheckRicambiFromVinResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message65">
+    <wsdl:part name="parameters" element="tns:GetCategorieBDRT" />
+  </wsdl:message>
+  <wsdl:message name="Message66">
+    <wsdl:part name="parameters" element="tns:GetCategorieBDRTResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message67">
+    <wsdl:part name="parameters" element="tns:CheckEurocodeDaTargaOE2" />
+  </wsdl:message>
+  <wsdl:message name="Message68">
+    <wsdl:part name="parameters" element="tns:CheckEurocodeDaTargaOE2Response" />
+  </wsdl:message>
+  <wsdl:message name="Message69">
+    <wsdl:part name="parameters" element="tns:GetIdParBDRTCompleto" />
+  </wsdl:message>
+  <wsdl:message name="Message70">
+    <wsdl:part name="parameters" element="tns:GetIdParBDRTCompletoResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message71">
+    <wsdl:part name="parameters" element="tns:GetGruppiBDRT" />
+  </wsdl:message>
+  <wsdl:message name="Message72">
+    <wsdl:part name="parameters" element="tns:GetGruppiBDRTResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message73">
+    <wsdl:part name="parameters" element="tns:SearchListiniCompletoByOe" />
+  </wsdl:message>
+  <wsdl:message name="Message74">
+    <wsdl:part name="parameters" element="tns:SearchListiniCompletoByOeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message75">
+    <wsdl:part name="parameters" element="tns:SearchKtypeByOe" />
+  </wsdl:message>
+  <wsdl:message name="Message76">
+    <wsdl:part name="parameters" element="tns:SearchKtypeByOeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message77">
+    <wsdl:part name="parameters" element="tns:GetRtFromInfobike" />
+  </wsdl:message>
+  <wsdl:message name="Message78">
+    <wsdl:part name="parameters" element="tns:GetRtFromInfobikeResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message79">
+    <wsdl:part name="parameters" element="tns:Element15" />
+  </wsdl:message>
+  <wsdl:message name="Message80">
+    <wsdl:part name="parameters" element="tns:Element16" />
+  </wsdl:message>
+  <wsdl:message name="Message81">
+    <wsdl:part name="parameters" element="tns:GetSvg" />
+  </wsdl:message>
+  <wsdl:message name="Message82">
+    <wsdl:part name="parameters" element="tns:GetSvgResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message83">
+    <wsdl:part name="parameters" element="tns:Element18" />
+  </wsdl:message>
+  <wsdl:message name="Message84">
+    <wsdl:part name="parameters" element="tns:Element19" />
+  </wsdl:message>
+  <wsdl:message name="Message85">
+    <wsdl:part name="parameters" element="tns:SearchInfobikeByOE" />
+  </wsdl:message>
+  <wsdl:message name="Message86">
+    <wsdl:part name="parameters" element="tns:SearchInfobikeByOEResponse" />
+  </wsdl:message>
+  <wsdl:portType name="PortType1">
+    <wsdl:operation name="Operation1">
+      
+      <wsdl:input message="tns:Message1" />
+      <wsdl:output message="tns:Message2" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation2">
+      
+      <wsdl:input message="tns:Message3" />
+      <wsdl:output message="tns:Message4" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation3">
+      
+      <wsdl:input message="tns:Message5" />
+      <wsdl:output message="tns:Message6" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation4">
+      
+      <wsdl:input message="tns:Message7" />
+      <wsdl:output message="tns:Message8" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation5">
+      
+      <wsdl:input message="tns:Message9" />
+      <wsdl:output message="tns:Message10" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation6">
+      
+      <wsdl:input message="tns:Message11" />
+      <wsdl:output message="tns:Message12" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation7">
+      
+      <wsdl:input message="tns:Message13" />
+      <wsdl:output message="tns:Message14" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation8">
+      
+      <wsdl:input message="tns:Message15" />
+      <wsdl:output message="tns:Message16" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation9">
+      
+      <wsdl:input message="tns:Message17" />
+      <wsdl:output message="tns:Message18" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation10">
+      
+      <wsdl:input message="tns:Message19" />
+      <wsdl:output message="tns:Message20" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation11">
+      
+      <wsdl:input message="tns:Message21" />
+      <wsdl:output message="tns:Message22" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation12">
+      
+      <wsdl:input message="tns:Message23" />
+      <wsdl:output message="tns:Message24" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation13">
+      
+      <wsdl:input message="tns:Message25" />
+      <wsdl:output message="tns:Message26" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation14">
+      
+      <wsdl:input message="tns:Message27" />
+      <wsdl:output message="tns:Message28" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation15">
+      
+      <wsdl:input message="tns:Message29" />
+      <wsdl:output message="tns:Message30" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation16">
+      
+      <wsdl:input message="tns:Message31" />
+      <wsdl:output message="tns:Message32" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation17">
+      
+      <wsdl:input message="tns:Message33" />
+      <wsdl:output message="tns:Message34" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation18">
+      
+      <wsdl:input message="tns:Message35" />
+      <wsdl:output message="tns:Message36" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation19">
+      
+      <wsdl:input message="tns:Message37" />
+      <wsdl:output message="tns:Message38" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation20">
+      
+      <wsdl:input message="tns:Message39" />
+      <wsdl:output message="tns:Message40" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation21">
+      
+      <wsdl:input message="tns:Message41" />
+      <wsdl:output message="tns:Message42" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation22">
+      
+      <wsdl:input message="tns:Message43" />
+      <wsdl:output message="tns:Message44" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation23">
+      
+      <wsdl:input message="tns:Message45" />
+      <wsdl:output message="tns:Message46" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation24">
+      
+      <wsdl:input message="tns:Message47" />
+      <wsdl:output message="tns:Message48" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation25">
+      
+      <wsdl:input message="tns:Message49" />
+      <wsdl:output message="tns:Message50" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation26">
+      
+      <wsdl:input message="tns:Message51" />
+      <wsdl:output message="tns:Message52" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation27">
+      
+      <wsdl:input message="tns:Message53" />
+      <wsdl:output message="tns:Message54" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation28">
+      
+      <wsdl:input message="tns:Message55" />
+      <wsdl:output message="tns:Message56" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation29">
+      
+      <wsdl:input message="tns:Message57" />
+      <wsdl:output message="tns:Message58" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation30">
+      
+      <wsdl:input message="tns:Message59" />
+      <wsdl:output message="tns:Message60" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation31">
+      
+      <wsdl:input message="tns:Message61" />
+      <wsdl:output message="tns:Message62" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation32">
+      <wsdl:input message="tns:Message63" />
+      <wsdl:output message="tns:Message64" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation33">
+      <wsdl:input message="tns:Message65" />
+      <wsdl:output message="tns:Message66" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation34">
+      <wsdl:input message="tns:Message67" />
+      <wsdl:output message="tns:Message68" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation35">
+      
+      <wsdl:input message="tns:Message69" />
+      <wsdl:output message="tns:Message70" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation36">
+      
+      <wsdl:input message="tns:Message71" />
+      <wsdl:output message="tns:Message72" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation37">
+      
+      <wsdl:input message="tns:Message73" />
+      <wsdl:output message="tns:Message74" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation38">
+      <wsdl:input message="tns:Message75" />
+      <wsdl:output message="tns:Message76" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation39">
+      
+      <wsdl:input message="tns:Message77" />
+      <wsdl:output message="tns:Message78" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation40">
+      
+      <wsdl:input message="tns:Message79" />
+      <wsdl:output message="tns:Message80" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation41">
+      
+      <wsdl:input message="tns:Message81" />
+      <wsdl:output message="tns:Message82" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation42">
+      
+      <wsdl:input message="tns:Message83" />
+      <wsdl:output message="tns:Message84" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation43">
+      
+      <wsdl:input message="tns:Message85" />
+      <wsdl:output message="tns:Message86" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Binding1" type="tns:PortType1">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Operation1">
+      <soap:operation soapAction="urn:example:ns1Operation1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation2">
+      <soap:operation soapAction="urn:example:ns1Operation2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation3">
+      <soap:operation soapAction="urn:example:ns1Operation3" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation4">
+      <soap:operation soapAction="urn:example:ns1Operation4" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation5">
+      <soap:operation soapAction="urn:example:ns1Operation5" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation6">
+      <soap:operation soapAction="urn:example:ns1Operation6" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation7">
+      <soap:operation soapAction="urn:example:ns1Operation7" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation8">
+      <soap:operation soapAction="urn:example:ns1Operation8" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation9">
+      <soap:operation soapAction="urn:example:ns1Operation9" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation10">
+      <soap:operation soapAction="urn:example:ns1Operation10" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation11">
+      <soap:operation soapAction="urn:example:ns1Operation11" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation12">
+      <soap:operation soapAction="urn:example:ns1Operation12" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation13">
+      <soap:operation soapAction="urn:example:ns1Operation13" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation14">
+      <soap:operation soapAction="urn:example:ns1Operation14" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation15">
+      <soap:operation soapAction="urn:example:ns1Operation15" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation16">
+      <soap:operation soapAction="urn:example:ns1Operation16" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation17">
+      <soap:operation soapAction="urn:example:ns1Operation17" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation18">
+      <soap:operation soapAction="urn:example:ns1Operation18" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation19">
+      <soap:operation soapAction="urn:example:ns1Operation19" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation20">
+      <soap:operation soapAction="urn:example:ns1Operation20" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation21">
+      <soap:operation soapAction="urn:example:ns1Operation21" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation22">
+      <soap:operation soapAction="urn:example:ns1Operation22" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation23">
+      <soap:operation soapAction="urn:example:ns1Operation23" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation24">
+      <soap:operation soapAction="urn:example:ns1Operation24" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation25">
+      <soap:operation soapAction="urn:example:ns1Operation25" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation26">
+      <soap:operation soapAction="urn:example:ns1Operation26" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation27">
+      <soap:operation soapAction="urn:example:ns1Operation27" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation28">
+      <soap:operation soapAction="urn:example:ns1Operation28" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation29">
+      <soap:operation soapAction="urn:example:ns1Operation29" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation30">
+      <soap:operation soapAction="urn:example:ns1Operation30" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation31">
+      <soap:operation soapAction="urn:example:ns1Operation31" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation32">
+      <soap:operation soapAction="urn:example:ns1Operation32" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation33">
+      <soap:operation soapAction="urn:example:ns1Operation33" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation34">
+      <soap:operation soapAction="urn:example:ns1Operation34" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation35">
+      <soap:operation soapAction="urn:example:ns1Operation35" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation36">
+      <soap:operation soapAction="urn:example:ns1Operation36" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation37">
+      <soap:operation soapAction="urn:example:ns1Operation37" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation38">
+      <soap:operation soapAction="urn:example:ns1Operation38" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation39">
+      <soap:operation soapAction="urn:example:ns1Operation39" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation40">
+      <soap:operation soapAction="urn:example:ns1Operation40" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation41">
+      <soap:operation soapAction="urn:example:ns1Operation41" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation42">
+      <soap:operation soapAction="urn:example:ns1Operation42" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation43">
+      <soap:operation soapAction="urn:example:ns1Operation43" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="Binding2" type="tns:PortType1">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Operation1">
+      <soap12:operation soapAction="urn:example:ns1Operation1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation2">
+      <soap12:operation soapAction="urn:example:ns1Operation2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation3">
+      <soap12:operation soapAction="urn:example:ns1Operation3" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation4">
+      <soap12:operation soapAction="urn:example:ns1Operation4" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation5">
+      <soap12:operation soapAction="urn:example:ns1Operation5" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation6">
+      <soap12:operation soapAction="urn:example:ns1Operation6" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation7">
+      <soap12:operation soapAction="urn:example:ns1Operation7" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation8">
+      <soap12:operation soapAction="urn:example:ns1Operation8" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation9">
+      <soap12:operation soapAction="urn:example:ns1Operation9" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation10">
+      <soap12:operation soapAction="urn:example:ns1Operation10" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation11">
+      <soap12:operation soapAction="urn:example:ns1Operation11" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation12">
+      <soap12:operation soapAction="urn:example:ns1Operation12" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation13">
+      <soap12:operation soapAction="urn:example:ns1Operation13" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation14">
+      <soap12:operation soapAction="urn:example:ns1Operation14" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation15">
+      <soap12:operation soapAction="urn:example:ns1Operation15" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation16">
+      <soap12:operation soapAction="urn:example:ns1Operation16" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation17">
+      <soap12:operation soapAction="urn:example:ns1Operation17" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation18">
+      <soap12:operation soapAction="urn:example:ns1Operation18" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation19">
+      <soap12:operation soapAction="urn:example:ns1Operation19" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation20">
+      <soap12:operation soapAction="urn:example:ns1Operation20" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation21">
+      <soap12:operation soapAction="urn:example:ns1Operation21" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation22">
+      <soap12:operation soapAction="urn:example:ns1Operation22" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation23">
+      <soap12:operation soapAction="urn:example:ns1Operation23" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation24">
+      <soap12:operation soapAction="urn:example:ns1Operation24" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation25">
+      <soap12:operation soapAction="urn:example:ns1Operation25" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation26">
+      <soap12:operation soapAction="urn:example:ns1Operation26" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation27">
+      <soap12:operation soapAction="urn:example:ns1Operation27" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation28">
+      <soap12:operation soapAction="urn:example:ns1Operation28" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation29">
+      <soap12:operation soapAction="urn:example:ns1Operation29" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation30">
+      <soap12:operation soapAction="urn:example:ns1Operation30" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation31">
+      <soap12:operation soapAction="urn:example:ns1Operation31" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation32">
+      <soap12:operation soapAction="urn:example:ns1Operation32" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation33">
+      <soap12:operation soapAction="urn:example:ns1Operation33" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation34">
+      <soap12:operation soapAction="urn:example:ns1Operation34" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation35">
+      <soap12:operation soapAction="urn:example:ns1Operation35" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation36">
+      <soap12:operation soapAction="urn:example:ns1Operation36" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation37">
+      <soap12:operation soapAction="urn:example:ns1Operation37" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation38">
+      <soap12:operation soapAction="urn:example:ns1Operation38" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation39">
+      <soap12:operation soapAction="urn:example:ns1Operation39" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation40">
+      <soap12:operation soapAction="urn:example:ns1Operation40" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation41">
+      <soap12:operation soapAction="urn:example:ns1Operation41" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation42">
+      <soap12:operation soapAction="urn:example:ns1Operation42" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation43">
+      <soap12:operation soapAction="urn:example:ns1Operation43" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Service1">
+    <wsdl:port name="Port1" binding="tns:Binding1">
+      <soap:address location="https://example.invalid/service" />
+    </wsdl:port>
+    <wsdl:port name="Port2" binding="tns:Binding2">
+      <soap12:address location="https://example.invalid/service" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

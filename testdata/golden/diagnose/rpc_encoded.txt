@@ -1,0 +1,7 @@
+service: RPCService
+targetNamespace: urn:diagnose:rpc
+stats: services=1 ports=1 portTypes=1 operations=1 messages=2 bindings=1 soap11=1 soap12=0 http=0 schemas=1 complexTypes=0 simpleTypes=0 elements=2 localElements=3 attributes=0 enumerations=0 complexExtensions=0 nillable=0 unbounded=0
+findings: 3
+error	unsupported/encoded-use	binding:CalculatorBinding/operation:Add	use="encoded" is not supported (literal only)
+error	unsupported/encoded-use	binding:CalculatorBinding/operation:Add	use="encoded" is not supported (literal only)
+error	unsupported/rpc-style	binding:CalculatorBinding/operation:Add	rpc style is not supported (SOAP 1.1 document/literal only)

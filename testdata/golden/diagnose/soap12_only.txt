@@ -1,0 +1,5 @@
+service: TwelveOnly
+targetNamespace: urn:diagnose:soap12
+stats: services=1 ports=1 portTypes=1 operations=1 messages=2 bindings=1 soap11=0 soap12=1 http=0 schemas=1 complexTypes=0 simpleTypes=0 elements=2 localElements=2 attributes=0 enumerations=0 complexExtensions=0 nillable=0 unbounded=0
+findings: 1
+error	unsupported/soap12-only	definitions	no SOAP 1.1 binding found (SOAP 1.2 only)

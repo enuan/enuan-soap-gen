@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="Importer" targetNamespace="urn:diagnose:import"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:diagnose:import">
+  <import namespace="urn:diagnose:other" location="other.wsdl"/>
+  <types>
+    <xs:schema targetNamespace="urn:diagnose:import" elementFormDefault="qualified">
+      <xs:element name="Go"><xs:complexType><xs:sequence><xs:element name="where" type="xs:string"/></xs:sequence></xs:complexType></xs:element>
+      <xs:element name="GoResponse"><xs:complexType><xs:sequence><xs:element name="ok" type="xs:boolean"/></xs:sequence></xs:complexType></xs:element>
+    </xs:schema>
+  </types>
+  <message name="GoIn"><part name="parameters" element="tns:Go"/></message>
+  <message name="GoOut"><part name="parameters" element="tns:GoResponse"/></message>
+  <portType name="GoPortType">
+    <operation name="Go"><input message="tns:GoIn"/><output message="tns:GoOut"/></operation>
+  </portType>
+  <binding name="GoBinding" type="tns:GoPortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Go">
+      <soap:operation soapAction="urn:diagnose:import/Go" style="document"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+</definitions>

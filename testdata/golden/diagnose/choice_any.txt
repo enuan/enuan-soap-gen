@@ -1,0 +1,16 @@
+service: Tricky
+targetNamespace: urn:diagnose:tricky
+stats: services=0 ports=0 portTypes=1 operations=2 messages=3 bindings=1 soap11=1 soap12=0 http=0 schemas=1 complexTypes=2 simpleTypes=3 elements=2 localElements=5 attributes=1 enumerations=2 complexExtensions=0 nillable=0 unbounded=0
+findings: 12
+error	unsupported/abstract-type	schema:urn:diagnose:tricky/complexType:AbstractEnvelope	abstract complex types cannot be mapped to JSON objects
+error	unsupported/substitution-group	xs:element:Subst	substitution groups are not supported
+error	unsupported/xsd-any	schema:urn:diagnose:tricky/complexType:TrickyPayload	xs:any cannot be mapped to a typed JSON object
+error	unsupported/xsd-choice	schema:urn:diagnose:tricky/complexType:TrickyPayload	xs:choice cannot be mapped to a typed JSON object
+warning	warning/empty-message	message:EmptyMessage	message has no parts
+warning	warning/one-way-operation	portType:FirePortType/operation:Fire	operation without both input and output is not mapped by the gateway
+warning	warning/untyped-element	schema:urn:diagnose:tricky/complexType:TrickyPayload/sequence/element:NoType	element without type, inline type or ref maps to raw XML
+warning	warning/xsd-list-union	schema:urn:diagnose:tricky/simpleType:Codes	xs:list/xs:union simple types are not fully mapped by the gateway
+warning	warning/xsd-list-union	schema:urn:diagnose:tricky/simpleType:Either	xs:list/xs:union simple types are not fully mapped by the gateway
+info	config-hint/session-field	schema:urn:diagnose:tricky/complexType:TrickyPayload/sequence/element:SessionId	field "SessionId" looks like a session/authentication field; configure auth.strategy in soapgen.yaml
+info	config-hint/state-field	schema:urn:diagnose:tricky/complexType:TrickyPayload/attribute:State	field "State" looks like an application state/error field; configure error_map in soapgen.yaml
+info	info/attributes	schema:urn:diagnose:tricky/complexType:TrickyPayload	1 attribute(s) declared; attributes are not part of the JSON body contract

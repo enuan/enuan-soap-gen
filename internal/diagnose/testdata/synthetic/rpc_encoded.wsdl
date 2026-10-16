@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="RPCService" targetNamespace="urn:diagnose:rpc"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:diagnose:rpc">
+  <types>
+    <xs:schema targetNamespace="urn:diagnose:rpc" elementFormDefault="qualified">
+      <xs:element name="Add"><xs:complexType><xs:sequence>
+        <xs:element name="a" type="xs:int"/><xs:element name="b" type="xs:int"/>
+      </xs:sequence></xs:complexType></xs:element>
+      <xs:element name="AddResponse"><xs:complexType><xs:sequence>
+        <xs:element name="result" type="xs:int"/>
+      </xs:sequence></xs:complexType></xs:element>
+    </xs:schema>
+  </types>
+  <message name="AddIn"><part name="parameters" element="tns:Add"/></message>
+  <message name="AddOut"><part name="parameters" element="tns:AddResponse"/></message>
+  <portType name="CalculatorPortType">
+    <operation name="Add"><input message="tns:AddIn"/><output message="tns:AddOut"/></operation>
+  </portType>
+  <binding name="CalculatorBinding" type="tns:CalculatorPortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc"/>
+    <operation name="Add">
+      <soap:operation soapAction="urn:diagnose:rpc/Add" style="rpc"/>
+      <input><soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+      <output><soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+    </operation>
+  </binding>
+  <service name="CalculatorService">
+    <port name="CalculatorPort" binding="tns:CalculatorBinding">
+      <soap:address location="http://example.invalid/rpc"/>
+    </port>
+  </service>
+</definitions>

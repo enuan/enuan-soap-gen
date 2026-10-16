@@ -9,6 +9,6 @@ REST layer wired with the enuan building blocks (`web-go`, `gonfoo`,
 `m3-go/log`), including OpenAPI, configuration scaffolding and tests.
 
 - Architecture, scope and roadmap: [PLAN.md](./PLAN.md)
-- Status: **F0 completed** — `github.com/enuan/soap-go` `v0.29.2-enuan.1`
-  (inheritance merge, simple-type recursion guard, binding dedup, single
-  module). Next: F1 (`internal/diagnose` + corpus).
+- Status: **F1 completed** — diagnose/normalize/anonymize + anonymized corpus
+  (`testdata/corpus`) with golden reports; CI (build/vet/test). Next: F2
+  (`internal/model` + Huma emit MVP).

@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="urn:example:ns1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="urn:example:ns2" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="urn:example:ns1" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="urn:example:ns1">
+      <s:element name="Login">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:LoginRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="LoginRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CompanyLogin" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProductName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ServPartsCompany" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="LoginResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="LoginResult" type="tns:LoginSeviceResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="LoginSeviceResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="SessionId" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="LoginState" type="tns:LoginStateCode" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorMsg" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="LoginStateCode">
+        <s:restriction base="s:string">
+          <s:enumeration value="SUCCESS" />
+          <s:enumeration value="SESSIONERROR" />
+          <s:enumeration value="POLICYERROR" />
+          <s:enumeration value="AUTHENTICATIONERROR" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetOperationSpareParts">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:BaseContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="BaseContext">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:BaseRequest">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="tagliandoParameters" type="tns:TagliandoParameters" />
+              <s:element minOccurs="0" maxOccurs="1" name="veicoloParameters" type="tns:VeicoloParameters" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="BaseRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="SessionId" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TagliandoParameters">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="LinkId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Sequenza" type="tns:ArrayOfInt" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfInt">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="int" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="VeicoloParameters">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="KmPercorsi" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataImmatricolazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataUltimaRevisione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetOperationSparePartsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetOperationSparePartsResult" type="tns:OperationSparePartsResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="OperationSparePartsResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="RicambioTagliandoCollection" type="tns:ArrayOfRicambioTagliando" />
+              <s:element minOccurs="0" maxOccurs="1" name="OperazioneCollection" type="tns:ArrayOfOperazione" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ResultBase">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Successo" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="CodiceErrore" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Messaggio" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfRicambioTagliando">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioTagliando" nillable="true" type="tns:RicambioTagliando" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioTagliando">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdLinea" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="IdPars" type="tns:ArrayOfInt" />
+          <s:element minOccurs="1" maxOccurs="1" name="Selezionato" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="OperazioneRiferimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Quantita" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IdParCollection" type="tns:ArrayOfString" />
+          <s:element minOccurs="1" maxOccurs="1" name="Tempo" type="s:float" />
+          <s:element minOccurs="0" maxOccurs="1" name="ItemId" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CostiAggiuntivi" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Note" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InformazioniTecnicheCollection" type="tns:ArrayOfInformazioniTecniche" />
+          <s:element minOccurs="0" maxOccurs="1" name="TempiAggiuntiviCollection" type="tns:ArrayOfInformazioniTecniche" />
+          <s:element minOccurs="0" maxOccurs="1" name="BDRTDatiRicambioCollection" type="tns:ArrayOfRicambioDBRT" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfInformazioniTecniche">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="InformazioniTecniche" nillable="true" type="tns:InformazioniTecniche" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="InformazioniTecniche">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="TextLeft" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TextRight" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="NoteRef" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GRef" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfRicambioDBRT">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RicambioDBRT" nillable="true" type="tns:RicambioDBRT" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RicambioDBRT">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdPar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="IdSimmetria" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TipoPar" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="VariantiListinoCollection" type="tns:ArrayOfVarianteListino" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfVarianteListino">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="VarianteListino" nillable="true" type="tns:VarianteListino" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="VarianteListino">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Colore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ParNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PeriodoCostruttivo" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="PrezzoListino" type="s:float" />
+          <s:element minOccurs="0" maxOccurs="1" name="UlterioreDescrizione" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfOperazione">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Operazione" nillable="true" type="tns:Operazione" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Operazione">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdLinea" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="OperazioneRiferimento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OperazioneDescrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OperazioneTipo" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="NoteRiferimentoId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="NoteTitolo" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="NoteRiferimentoDescrizione" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetIntervals">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:BaseContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetIntervalsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetIntervalsResult" type="tns:IntervalsResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="IntervalsResult">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="IntervalliTagliandoCollection" type="tns:ArrayOfIntervalliTagliando" />
+              <s:element minOccurs="0" maxOccurs="1" name="TipoTagliando" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="IdTagliandoSelezionato" type="s:int" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfIntervalliTagliando">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="IntervalliTagliando" nillable="true" type="tns:IntervalliTagliando" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="IntervalliTagliando">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Selezionato" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="Sequenza" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Variante" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Km" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Mesi" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="MesiPianificati" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TempoStandard" type="s:float" />
+          <s:element minOccurs="1" maxOccurs="1" name="TempoStandardAutomatico" type="s:float" />
+          <s:element minOccurs="1" maxOccurs="1" name="DifferenzaPercentuale" type="s:double" />
+          <s:element minOccurs="0" maxOccurs="1" name="Icon" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExtraTimeCollection" type="tns:ArrayOfExtraTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfExtraTime">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ExtraTime" nillable="true" type="tns:ExtraTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ExtraTime">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Selezionato" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descrizione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Tempo" type="s:float" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetIntervalsAdditional">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:BaseContext" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetIntervalsAdditionalResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetIntervalsAdditionalResult" type="tns:IntervalsResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Element2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="context" type="tns:Type1" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Type1">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:BaseRequest">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="veicoloParameters" type="tns:VeicoloParametersWithPlate" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="VeicoloParametersWithPlate">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Targa" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="KmPercorsi" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataImmatricolazione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataUltimaRevisione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Element3">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Element4" type="tns:Type2" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Type2">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ResultBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataPrimaImmatricolazione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="DataUltimaRevisione" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Element1" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Element5" type="tns:ArrayOfString" />
+              <s:element minOccurs="0" maxOccurs="1" name="Telaio" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="PianoManutentivoCollection" type="tns:ArrayOfPianoManutentivo" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfPianoManutentivo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PianoManutentivo" nillable="true" type="tns:PianoManutentivo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PianoManutentivo">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:PianoManutentivoBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="PianoManutentivoModelloCollection" type="tns:ArrayOfPianoManutentivoModello" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="PianoManutentivoBase">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="MidId" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPianoManutentivoModello">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PianoManutentivoModello" nillable="true" type="tns:PianoManutentivoModello" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PianoManutentivoModello">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:PianoManutentivoModelloBase1">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="TipoTagliandoCollection" type="tns:ArrayOfTipoTagliando" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="PianoManutentivoModelloBase1">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="Selezionato" nillable="true" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="NomeModello" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Carburante" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Info" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodiceMotore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Potenza" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UlterioreDescrizione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InizioAnnoProduzione" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FineAnnoProduzione" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TipoVeicolo" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTipoTagliando">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TipoTagliando" nillable="true" type="tns:TipoTagliando" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TipoTagliando">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="Costruttore" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IdCategoria" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TipoCategoria" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Variante" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="LinkId" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Selezionato" nillable="true" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneVariante" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescrizioneVarianteOriginale" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="Message1">
+    <wsdl:part name="parameters" element="tns:Login" />
+  </wsdl:message>
+  <wsdl:message name="Message2">
+    <wsdl:part name="parameters" element="tns:LoginResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message3">
+    <wsdl:part name="parameters" element="tns:GetOperationSpareParts" />
+  </wsdl:message>
+  <wsdl:message name="Message4">
+    <wsdl:part name="parameters" element="tns:GetOperationSparePartsResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message5">
+    <wsdl:part name="parameters" element="tns:GetIntervals" />
+  </wsdl:message>
+  <wsdl:message name="Message6">
+    <wsdl:part name="parameters" element="tns:GetIntervalsResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message7">
+    <wsdl:part name="parameters" element="tns:GetIntervalsAdditional" />
+  </wsdl:message>
+  <wsdl:message name="Message8">
+    <wsdl:part name="parameters" element="tns:GetIntervalsAdditionalResponse" />
+  </wsdl:message>
+  <wsdl:message name="Message9">
+    <wsdl:part name="parameters" element="tns:Element2" />
+  </wsdl:message>
+  <wsdl:message name="Message10">
+    <wsdl:part name="parameters" element="tns:Element3" />
+  </wsdl:message>
+  <wsdl:portType name="PortType1">
+    <wsdl:operation name="Operation1">
+      
+      <wsdl:input message="tns:Message1" />
+      <wsdl:output message="tns:Message2" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation2">
+      <wsdl:input message="tns:Message3" />
+      <wsdl:output message="tns:Message4" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation3">
+      <wsdl:input message="tns:Message5" />
+      <wsdl:output message="tns:Message6" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation4">
+      <wsdl:input message="tns:Message7" />
+      <wsdl:output message="tns:Message8" />
+    </wsdl:operation>
+    <wsdl:operation name="Operation5">
+      <wsdl:input message="tns:Message9" />
+      <wsdl:output message="tns:Message10" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Binding1" type="tns:PortType1">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Operation1">
+      <soap:operation soapAction="urn:example:ns1Operation1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation2">
+      <soap:operation soapAction="urn:example:ns1Operation2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation3">
+      <soap:operation soapAction="urn:example:ns1Operation3" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation4">
+      <soap:operation soapAction="urn:example:ns1Operation4" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation5">
+      <soap:operation soapAction="urn:example:ns1Operation5" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="Binding2" type="tns:PortType1">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Operation1">
+      <soap12:operation soapAction="urn:example:ns1Operation1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation2">
+      <soap12:operation soapAction="urn:example:ns1Operation2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation3">
+      <soap12:operation soapAction="urn:example:ns1Operation3" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation4">
+      <soap12:operation soapAction="urn:example:ns1Operation4" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Operation5">
+      <soap12:operation soapAction="urn:example:ns1Operation5" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Service1">
+    <wsdl:port name="Port1" binding="tns:Binding1">
+      <soap:address location="https://example.invalid/service" />
+    </wsdl:port>
+    <wsdl:port name="Port2" binding="tns:Binding2">
+      <soap12:address location="https://example.invalid/service" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

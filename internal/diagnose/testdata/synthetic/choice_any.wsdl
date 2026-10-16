@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="Tricky" targetNamespace="urn:diagnose:tricky"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:diagnose:tricky">
+  <types>
+    <xs:schema targetNamespace="urn:diagnose:tricky" elementFormDefault="qualified">
+      <xs:simpleType name="Color">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="red"/><xs:enumeration value="green"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="Codes"><xs:list itemType="xs:string"/></xs:simpleType>
+      <xs:simpleType name="Either"><xs:union memberTypes="xs:string xs:int"/></xs:simpleType>
+      <xs:complexType name="AbstractEnvelope" abstract="true">
+        <xs:sequence><xs:element name="id" type="xs:string"/></xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TrickyPayload">
+        <xs:sequence>
+          <xs:element name="SessionId" type="xs:string"/>
+          <xs:choice>
+            <xs:element name="byCode" type="xs:string"/>
+            <xs:element name="byName" type="xs:string"/>
+          </xs:choice>
+          <xs:any namespace="##other"/>
+          <xs:element name="NoType"/>
+        </xs:sequence>
+        <xs:attribute name="State" type="xs:string"/>
+      </xs:complexType>
+      <xs:element name="Head" type="xs:string"/>
+      <xs:element name="Subst" type="xs:string" substitutionGroup="tns:Head"/>
+    </xs:schema>
+  </types>
+  <message name="FireIn"><part name="parameters" element="tns:Subst"/></message>
+  <message name="FireOut"><part name="parameters" element="tns:Head"/></message>
+  <message name="EmptyMessage"/>
+  <portType name="FirePortType">
+    <operation name="Fire"><input message="tns:FireIn"/></operation>
+    <operation name="Notify"><input message="tns:EmptyMessage"/><output message="tns:FireOut"/></operation>
+  </portType>
+  <binding name="FireBinding" type="tns:FirePortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Fire">
+      <soap:operation soapAction="urn:diagnose:tricky/Fire" style="document"/>
+      <input><soap:body use="literal"/></input>
+    </operation>
+    <operation name="Notify">
+      <soap:operation soapAction="urn:diagnose:tricky/Notify" style="document"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+</definitions>

@@ -60,9 +60,10 @@ Un mismatch tra i due modelli è un errore fatale (segnala drift del codegen).
 ### [1] ingest
 - Input: file locale o URL; il WSDL viene copiato/vendorizzato nel repo.
 - Hash del WSDL registrato nell'header dei file generati (rigenerazioni
-  idempotenti).
+  idempotenti). *(implementato: `internal/ingest`, sha256 + download URL)*
 - Rifiuto esplicito per: rpc/encoded, SOAP 1.2-only, `wsdl:import` esterni non
   risolvibili, MTOM/MIME. Messaggio con motivo, niente output parziale.
+  *(implementato come finding `error` in [2])*
 - Rilevamento `xs:include`/`xs:import` (supportati dopo i cherry-pick; se
   presenti senza supporto → errore chiaro).
 
@@ -82,6 +83,10 @@ generazione. Questo stadio diventa di sola diagnostica:
 
 `--normalize` è off di default e va usato **solo come mitigazione temporanea**,
 con un TODO che rimanda al fix nel fork.
+
+*(implementato: `internal/diagnose` con regole severità error/warning/info,
+report testuale deterministico + golden, `diagnose.Check(defs, raw)`; report
+JSON per l'uso macchina)*
 
 ### [3] clientgen
 - Invoca il CLI del fork: `soap gen --client`.
@@ -138,6 +143,22 @@ Regole di mapping REST:
   - ChatService: codegen senza stack overflow e con un solo metodo per operazione.
 - Smoke test opzionale (`-tags smoke`) contro endpoint dev con credenziali env.
 
+#### Corpus pubblico anonimizzato (policy)
+
+Il corpus vive in `testdata/corpus/` ed è pubblico perché **anonimizzato**:
+endpoint, namespace, service/port/binding/portType/operation/message sono
+sostituiti da placeholder deterministici; i `<documentation>` sono rimossi; i
+nomi XSD (tipi/campi) restano per mantenere significative le marshal
+assertions. I WSDL originali dei partner non entrano mai nel repo.
+
+- generazione: `make corpus-regen WSDL_CHAT=... WSDL_RTWS=... WSDL_TAGLIANDI=...`
+  (`internal/anonymize`, deterministico);
+- garanzie: `anonymize` rifiuta l'output se restano deny-word o host non
+  placeholder; i test verificano stats identiche all'originale, assenza di
+  deny-word e build del codice generato dal corpus;
+- golden report in `testdata/golden/diagnose/` (`make golden`);
+- le assertions sui WSDL reali (nomi non anonimizzati) restano test locali.
+
 ## 3. Configurazione `soapgen.yaml`
 
 ```yaml
@@ -190,13 +211,18 @@ così un nuovo servizio richiede al massimo 2 file di glue.
 ## 5. Struttura repo del tool
 
 ```
-cmd/enuan-soap-gen/main.go
-internal/diagnose/       check WSDL + normalizer di fallback (--normalize)
-internal/clientgen/     wrapper del CLI fork
-internal/model/         estrazione wsdl/xsd + go/ast
-internal/emit/          template (Huma, config, main, Makefile) + go/format
-internal/verify/        build/golden/marshal assertions
-testdata/               corpus WSDL + output attesi
+cmd/enuan-soap-gen/main.go   CLI (cobra): diagnose, normalize, anonymize
+internal/ingest/             file/URL + sha256
+internal/diagnose/           check costrutti + normalize.go (escape hatch)
+internal/anonymize/          copia di corpus anonimizzata (deny-word scan)
+internal/xmltree/            DOM a offset di byte (preserva prefissi/format)
+internal/clientgen/          (F2) wrapper del CLI fork
+internal/model/              (F2/F3) estrazione wsdl/xsd + go/ast
+internal/emit/               (F2) template (Huma, config, main, Makefile) + go/format
+internal/verify/             (F3) build/golden/marshal assertions
+testdata/corpus/             corpus WSDL anonimizzato + README policy
+testdata/golden/diagnose/    report attesi
+internal/*/testdata/         fixture sintetiche (unsupported, inheritance, ...)
 ```
 
 Templating: `text/template` + `go/format`/`imports` sui file emessi.
@@ -207,7 +233,7 @@ CLI: `enuan-soap-gen gen|verify|diff` (binario `enuan-soap-gen`, alias `soapgen`
 | Fase | Contenuto | Stima |
 |---|---|---|
 | **F0** ✅ | fork `enuan/soap-go`: cherry-pick fix tnymlr + fix nostri + rebrand modulo | fatto |
-| **F1** | `internal/diagnose` (check costrutti + golden) + normalizer di fallback | 1-2 gg |
+| **F1** ✅ | `internal/ingest` + `internal/diagnose` (regole + golden) + `internal/anonymize` + corpus anonimizzato + normalizer di fallback | fatto |
 | **F2** | `internal/model` + `internal/emit` MVP (Huma + main/config) | 4-5 gg |
 | **F3** | hook auth/stato + `soapgen.yaml` + `internal/verify` con marshal assertions | 3-4 gg |
 | **F4** | pilota end-to-end su `uvetgbt-soap-go` (Echo + un'operazione reale) | 2 gg |
@@ -301,3 +327,36 @@ Ordine di lavoro consigliato (minimizza i conflitti):
   `soap version v0.29.2-enuan.1` (il bug del nested module è risolto).
 - Conseguenza per il piano: lo stadio [2] resta `diagnose` (non `normalize`);
   `sanitize`/`flatten` non sono più necessari sul percorso default.
+
+### Esito F1 (completato)
+
+- `cmd/enuan-soap-gen` (cobra): `diagnose` (`--json`, `--fail-on`),
+  `normalize` (escape hatch, tutte le trasformazioni on di default), `anonymize`
+  (`--deny`, leak scan obbligatorio).
+- `internal/ingest`: file locale o URL (download + sha256, limite 32 MiB).
+- `internal/diagnose`: regole severity error/warning/info — unsupported
+  (rpc/encoded/mime/soap12-only/xsd-choice/xsd-any/substitution-group/
+  abstract/wsdl-import), known-pitfall (schema Microsoft serialization,
+  simpleType che shadowa un primitivo, binding SOAP 1.1 duplicati),
+  config-hint (session/state field), warning (untyped element, one-way,
+  list/union, group ref, mixed, base non risolto) + stats rename-independent.
+  Report testuale deterministico + JSON.
+- `internal/diagnose/normalize.go`: fallback token/byte-range — rimozione
+  schema MS serialization, dedup binding SOAP 1.1 (con relativi port), flatten
+  ricorsivo `complexContent/extension` (attributi inclusi, cycle-safe,
+  choice/group lasciati intatti e segnalati); idempotente.
+- `internal/xmltree`: DOM a offset di byte per trasformazioni che preservano
+  prefissi/format (il round-trip con `xml.Marshal` sulle struct wsdl è lossy).
+- `internal/anonymize`: rinomina placeholder deterministica di
+  service/port/binding/portType/operation/message, namespace → `urn:example:nsN`,
+  endpoint → `https://example.invalid/service`, drop `<documentation>`,
+  rename dei simboli XSD solo se matching deny-word; leak scan (deny-word +
+  host non placeholder) e rifiuto dell'output.
+- Corpus pubblico `testdata/corpus/` (chat_service, rtws, tagliandi): stats
+  identiche agli originali, nessuna deny-word, golden report in
+  `testdata/golden/diagnose/`; il corpus genera codice col fork rilasciato che
+  compila e passa `go vet`.
+- Test: golden + asserzioni sintetiche (rpc/encoded, soap12-only, import,
+  choice/any/substitutionGroup, http binding), normalizer (idempotenza,
+  campi ereditati `SessionId`/`state`), anonymizer (leak scan, stats),
+  xmltree, ingest. `make ci` locale + GitHub Actions.

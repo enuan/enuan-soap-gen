@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="TwelveOnly" targetNamespace="urn:diagnose:soap12"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:diagnose:soap12">
+  <types>
+    <xs:schema targetNamespace="urn:diagnose:soap12" elementFormDefault="qualified">
+      <xs:element name="Ping"><xs:complexType><xs:sequence><xs:element name="msg" type="xs:string"/></xs:sequence></xs:complexType></xs:element>
+      <xs:element name="PingResponse"><xs:complexType><xs:sequence><xs:element name="result" type="xs:string"/></xs:sequence></xs:complexType></xs:element>
+    </xs:schema>
+  </types>
+  <message name="PingIn"><part name="parameters" element="tns:Ping"/></message>
+  <message name="PingOut"><part name="parameters" element="tns:PingResponse"/></message>
+  <portType name="PingPortType">
+    <operation name="Ping"><input message="tns:PingIn"/><output message="tns:PingOut"/></operation>
+  </portType>
+  <binding name="PingBinding" type="tns:PingPortType">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Ping">
+      <soap12:operation soapAction="urn:diagnose:soap12/Ping" style="document"/>
+      <input><soap12:body use="literal"/></input>
+      <output><soap12:body use="literal"/></output>
+    </operation>
+  </binding>
+  <service name="PingService">
+    <port name="PingPort" binding="tns:PingBinding">
+      <soap12:address location="http://example.invalid/soap12"/>
+    </port>
+  </service>
+</definitions>

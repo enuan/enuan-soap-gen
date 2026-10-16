@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Inheritance that cannot be flattened faithfully: the extension adds a
+  choice, so the normalizer must leave the complexContent in place and report
+  the type as unflattened.
+-->
+<definitions name="Unflattenable" targetNamespace="urn:diagnose:unflattened"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:diagnose:unflattened">
+  <types>
+    <xs:schema targetNamespace="urn:diagnose:unflattened" elementFormDefault="qualified">
+      <xs:complexType name="Base">
+        <xs:sequence><xs:element name="id" type="xs:string"/></xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Derived">
+        <xs:complexContent>
+          <xs:extension base="tns:Base">
+            <xs:choice>
+              <xs:element name="byCode" type="xs:string"/>
+              <xs:element name="byName" type="xs:string"/>
+            </xs:choice>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:element name="Run"><xs:complexType><xs:sequence>
+        <xs:element name="payload" type="tns:Derived"/>
+      </xs:sequence></xs:complexType></xs:element>
+      <xs:element name="RunResponse"><xs:complexType><xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence></xs:complexType></xs:element>
+    </xs:schema>
+  </types>
+  <message name="RunIn"><part name="parameters" element="tns:Run"/></message>
+  <message name="RunOut"><part name="parameters" element="tns:RunResponse"/></message>
+  <portType name="RunPortType">
+    <operation name="Run"><input message="tns:RunIn"/><output message="tns:RunOut"/></operation>
+  </portType>
+  <binding name="RunBinding" type="tns:RunPortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Run">
+      <soap:operation soapAction="urn:diagnose:unflattened/Run" style="document"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+</definitions>

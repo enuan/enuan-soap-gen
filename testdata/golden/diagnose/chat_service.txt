@@ -1,0 +1,7 @@
+service: Service1
+targetNamespace: urn:example:ns1
+stats: services=1 ports=2 portTypes=1 operations=4 messages=8 bindings=2 soap11=2 soap12=0 http=0 schemas=2 complexTypes=0 simpleTypes=3 elements=29 localElements=8 attributes=3 enumerations=0 complexExtensions=0 nillable=29 unbounded=0
+findings: 3
+info	known-pitfall/duplicate-soap11-bindings	portType:PortType1	2 SOAP 1.1 bindings reference the same portType; enuan-soap-go >= v0.29.2-enuan.1 emits one client method per operation
+info	known-pitfall/ms-serialization-schema	schema:http://schemas.microsoft.com/2003/10/Serialization/	Microsoft serialization schema detected; handled by enuan-soap-go >= v0.29.2-enuan.1 (self-referencing simple types no longer overflow)
+info	known-pitfall/simple-type-shadowing	schema:http://schemas.microsoft.com/2003/10/Serialization//simpleType:duration	simple type restricted from "xs:duration" shadows the XSD primitive with the same name; handled by enuan-soap-go >= v0.29.2-enuan.1 (recursion guard)

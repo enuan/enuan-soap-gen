@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="Dual" targetNamespace="urn:diagnose:http"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:diagnose:http">
+  <types>
+    <xs:schema targetNamespace="urn:diagnose:http" elementFormDefault="qualified">
+      <xs:element name="Lookup"><xs:complexType><xs:sequence><xs:element name="key" type="xs:string"/></xs:sequence></xs:complexType></xs:element>
+      <xs:element name="LookupResponse"><xs:complexType><xs:sequence><xs:element name="value" type="xs:string"/></xs:sequence></xs:complexType></xs:element>
+    </xs:schema>
+  </types>
+  <message name="LookupIn"><part name="parameters" element="tns:Lookup"/></message>
+  <message name="LookupOut"><part name="parameters" element="tns:LookupResponse"/></message>
+  <portType name="LookupPortType">
+    <operation name="Lookup"><input message="tns:LookupIn"/><output message="tns:LookupOut"/></operation>
+  </portType>
+  <binding name="LookupSoap" type="tns:LookupPortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Lookup">
+      <soap:operation soapAction="urn:diagnose:http/Lookup" style="document"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+  <binding name="LookupHttpGet" type="tns:LookupPortType">
+    <http:binding verb="GET"/>
+    <operation name="Lookup">
+      <http:operation location="/Lookup"/>
+      <input><http:urlEncoded/></input>
+      <output><http:urlReplacement/></output>
+    </operation>
+  </binding>
+  <service name="LookupService">
+    <port name="LookupSoapPort" binding="tns:LookupSoap">
+      <soap:address location="http://example.invalid/lookup"/>
+    </port>
+    <port name="LookupHttpGetPort" binding="tns:LookupHttpGet">
+      <http:address location="http://example.invalid/lookup"/>
+    </port>
+  </service>
+</definitions>
