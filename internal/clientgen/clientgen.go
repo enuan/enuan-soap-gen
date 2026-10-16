@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime/debug"
 	"strings"
+
+	"github.com/enuan/enuan-soap-gen/internal/config"
 )
 
 // Options configures one client generation run.
@@ -16,13 +18,9 @@ type Options struct {
 	Package  string // Go package name of the generated client
 	OutDir   string
 	// SoapBin is an explicit path to the `soap` binary. When empty the CLI is
-	// run from the Go module cache with `go run <SoapGo>/cmd/soap@<Version>`.
+	// run from the Go module cache with
+	// `go run github.com/enuan/soap-go/cmd/soap@<generator's soap-go version>`.
 	SoapBin string
-	// SoapGo is the soap-go module path (default github.com/enuan/soap-go).
-	SoapGo string
-	// Version pins the module version for `go run`. When empty the version the
-	// generator itself was built with is used.
-	Version string
 }
 
 // Run generates the client. It returns the combined CLI output on failure.
@@ -42,26 +40,20 @@ func Command(opts Options) (string, []string) {
 	if opts.SoapBin != "" {
 		return opts.SoapBin, genArgs
 	}
-	soapGo := opts.SoapGo
-	if soapGo == "" {
-		soapGo = "github.com/enuan/soap-go"
-	}
+	soapGo := config.SoapGoModule
 	target := soapGo + "/cmd/soap"
-	if v := resolveVersion(opts.Version); v != "" {
+	if v := resolveVersion(); v != "" {
 		target += "@" + v
 	}
 	return "go", append([]string{"run", target}, genArgs...)
 }
 
-// resolveVersion picks the soap-go version to run: explicit, then the version
-// this generator was built with, then "latest".
-func resolveVersion(explicit string) string {
-	if explicit != "" {
-		return explicit
-	}
+// resolveVersion picks the soap-go version to run: the version this generator
+// was built with, then "latest".
+func resolveVersion() string {
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, dep := range info.Deps {
-			if dep.Path == "github.com/enuan/soap-go" && dep.Version != "" && dep.Version != "(devel)" {
+			if dep.Path == config.SoapGoModule && dep.Version != "" && dep.Version != "(devel)" {
 				return dep.Version
 			}
 		}

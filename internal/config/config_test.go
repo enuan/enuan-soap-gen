@@ -3,12 +3,22 @@ package config_test
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/enuan/enuan-soap-gen/internal/config"
 )
 
 func load(t *testing.T, extra string) *config.Config {
+	t.Helper()
+	cfg, err := loadErr(t, extra)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cfg
+}
+
+func loadErr(t *testing.T, extra string) (*config.Config, error) {
 	t.Helper()
 	dir := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(dir, "wsdl"), 0o755); err != nil {
@@ -24,9 +34,22 @@ func load(t *testing.T, extra string) *config.Config {
 	}
 	cfg, err := config.Load(path)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
-	return cfg
+	return cfg, nil
+}
+
+// TestRemovedSoapGoKeys: soap_go and soap_go_version no longer exist; strict
+// decoding rejects them instead of silently ignoring them.
+func TestRemovedSoapGoKeys(t *testing.T) {
+	for _, key := range []string{
+		"soap_go: github.com/example/soap-go\n",
+		"soap_go_version: v0.29.2-enuan.1\n",
+	} {
+		if _, err := loadErr(t, key); err == nil {
+			t.Errorf("soapgen.yaml with %q was accepted, want an unknown-field error", strings.TrimSpace(key))
+		}
+	}
 }
 
 // TestCmdDirKeepsGatewayName: the command directory (and therefore the binary

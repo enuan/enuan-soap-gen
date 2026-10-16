@@ -186,8 +186,7 @@ service: rtws
 wsdl: wsdl/rtservice.wsdl
 module: github.com/enuan/infocar-rtws-go
 base_path: /api
-soap_go: github.com/enuan/soap-go      # fork
-soap_bin: ""                           # vuoto = go run dal modulo fork
+soap_bin: ""                           # vuoto = go run github.com/enuan/soap-go/cmd/soap
 
 operations:
   include: [Login, GetVersion, GetRTDaTarga]
@@ -516,7 +515,8 @@ Pilota in `~/m3/projects/go/src/github.com/enuan/uvetgbt-soap-go` (repo locale,
 nessun remote: contiene il WSDL partner con endpoint reali).
 
 - `soapgen.yaml`: `service: chat`, WSDL **non sanitizzato** (`wsdl/ChatService.dev.wsdl`),
-  `soap_go_version: v0.29.2-enuan.1`, `config_path: uvetgbt.soap`, JSON camelCase;
+  `config_path: uvetgbt.soap`, JSON camelCase (la versione di soap-go usata per
+  la codegen e' quella con cui e' buildato il generatore);
   nessuna auth, nessun error_map (i payload sono `xs:string` opachi).
 - `enuan-soap-gen gen` end-to-end: clientgen dal CLI rilasciato → model → emit
   → tidy → verify (`10 ok, 0 warnings, 0 failed`); il WSDL reale passa senza

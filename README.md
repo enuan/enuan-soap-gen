@@ -71,7 +71,6 @@ service: rtws
 wsdl: wsdl/rtservice.wsdl
 module: github.com/enuan/infocar-rtws-go
 base_path: /api
-soap_go: github.com/enuan/soap-go
 soap_bin: ""              # empty: go run github.com/enuan/soap-go/cmd/soap
 operations:
   include: [Login, GetVersion]     # empty = all

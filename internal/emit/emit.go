@@ -485,6 +485,7 @@ func (v *view) render(name string) ([]byte, error) {
 		"dtoExpr":     v.DTOExpr,
 		"tags":        v.Tags,
 		"quote":       func(s string) string { return fmt.Sprintf("%q", s) },
+		"soapGo":      func() string { return config.SoapGoModule },
 		"comment":     commentText,
 		"join":        strings.Join,
 		"indentLines": indentLines,

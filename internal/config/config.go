@@ -12,14 +12,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// SoapGoModule is the soap-go module path used by generated code. The enuan
+// stack is hard-wired to the enuan fork; there is no soapgen.yaml knob.
+const SoapGoModule = "github.com/enuan/soap-go"
+
 // Config is the soapgen.yaml document.
 type Config struct {
 	Service        string     `yaml:"service"`
 	WSDL           string     `yaml:"wsdl"`
 	Module         string     `yaml:"module"`
 	BasePath       string     `yaml:"base_path"`
-	SoapGo         string     `yaml:"soap_go"`
-	SoapGoVersion  string     `yaml:"soap_go_version"`
 	SoapBin        string     `yaml:"soap_bin"`
 	ClientDir      string     `yaml:"client_dir"`
 	APIDir         string     `yaml:"api_dir"`
@@ -130,9 +132,6 @@ func (c *Config) applyDefaults() {
 		c.BasePath = "/" + c.BasePath
 	}
 	c.BasePath = strings.TrimSuffix(c.BasePath, "/")
-	if c.SoapGo == "" {
-		c.SoapGo = "github.com/enuan/soap-go"
-	}
 	if c.Gateway == "" {
 		c.Gateway = c.installName() + "-gateway"
 	}

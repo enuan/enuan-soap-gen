@@ -278,8 +278,6 @@ func newGenCommand() *cobra.Command {
 					Package:  cfg.PackageName(),
 					OutDir:   clientDir,
 					SoapBin:  cfg.SoapBin,
-					SoapGo:   cfg.SoapGo,
-					Version:  cfg.SoapGoVersion,
 				}); err != nil {
 					return err
 				}
