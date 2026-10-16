@@ -9,10 +9,16 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/enuan/enuan-soap-gen/internal/anonymize"
+	"github.com/enuan/enuan-soap-gen/internal/clientgen"
+	"github.com/enuan/enuan-soap-gen/internal/config"
 	"github.com/enuan/enuan-soap-gen/internal/diagnose"
+	"github.com/enuan/enuan-soap-gen/internal/emit"
 	"github.com/enuan/enuan-soap-gen/internal/ingest"
+	"github.com/enuan/enuan-soap-gen/internal/model"
 	"github.com/enuan/soap-go/wsdl"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +40,7 @@ func newRootCommand() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newDiagnoseCommand(), newNormalizeCommand(), newAnonymizeCommand(), newVersionCommand())
+	root.AddCommand(newDiagnoseCommand(), newNormalizeCommand(), newAnonymizeCommand(), newGenCommand(), newVersionCommand())
 	return root
 }
 
@@ -221,5 +227,96 @@ func newAnonymizeCommand() *cobra.Command {
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print the rename mapping")
 	_ = cmd.MarkFlagRequired("input")
 	_ = cmd.MarkFlagRequired("output")
+	return cmd
+}
+
+func newGenCommand() *cobra.Command {
+	var (
+		configPath string
+		clientOnly bool
+		skipClient bool
+		noTidy     bool
+	)
+	cmd := &cobra.Command{
+		Use:   "gen",
+		Short: "Generate the SOAP client and the REST/JSON gateway",
+		Long: "Runs the full pipeline: ingest, diagnose, client generation (soap gen),\n" +
+			"model extraction (WSDL + go/ast) and emission of the Huma gateway.",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			cfg, err := config.Load(configPath)
+			if err != nil {
+				return err
+			}
+			root := cfg.Dir
+			ctx := cmd.Context()
+
+			// [1] ingest + [2] diagnose
+			src, err := ingest.Load(cfg.WSDLPath())
+			if err != nil {
+				return err
+			}
+			defer src.Close()
+			defs, err := src.Parse()
+			if err != nil {
+				return err
+			}
+			report := diagnose.Check(defs, src.Raw)
+			report.Ref = src.Ref
+			report.SHA256 = src.SHA256
+			if report.HasErrors() {
+				_ = report.WriteText(cmd.ErrOrStderr())
+				return fmt.Errorf("diagnose: unsupported constructs found, nothing generated")
+			}
+
+			// [3] clientgen
+			clientDir := filepath.Join(root, cfg.ClientDir)
+			if !skipClient {
+				if err := clientgen.Run(ctx, clientgen.Options{
+					WSDLPath: cfg.WSDLPath(),
+					Package:  cfg.PackageName(),
+					OutDir:   clientDir,
+					SoapBin:  cfg.SoapBin,
+					SoapGo:   cfg.SoapGo,
+					Version:  cfg.SoapGoVersion,
+				}); err != nil {
+					return err
+				}
+			}
+			if clientOnly {
+				return nil
+			}
+
+			// [4] model + [5] emit
+			m, err := model.Build(cfg, clientDir)
+			if err != nil {
+				return err
+			}
+			res, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m})
+			if err != nil {
+				return err
+			}
+			for _, f := range res.Written {
+				fmt.Fprintln(cmd.ErrOrStderr(), "wrote", f)
+			}
+			for _, f := range res.Skipped {
+				fmt.Fprintln(cmd.ErrOrStderr(), "kept", f)
+			}
+
+			if !noTidy {
+				tidy := exec.CommandContext(ctx, "go", "mod", "tidy")
+				tidy.Dir = root
+				tidy.Stdout = cmd.ErrOrStderr()
+				tidy.Stderr = cmd.ErrOrStderr()
+				if err := tidy.Run(); err != nil {
+					return fmt.Errorf("go mod tidy: %w", err)
+				}
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&configPath, "config", "soapgen.yaml", "path to soapgen.yaml")
+	cmd.Flags().BoolVar(&clientOnly, "client-only", false, "only run the SOAP client generation")
+	cmd.Flags().BoolVar(&skipClient, "skip-client", false, "reuse the existing generated SOAP client")
+	cmd.Flags().BoolVar(&noTidy, "no-tidy", false, "skip go mod tidy")
 	return cmd
 }

@@ -9,6 +9,85 @@ REST layer wired with the enuan building blocks (`web-go`, `gonfoo`,
 `m3-go/log`), including OpenAPI, configuration scaffolding and tests.
 
 - Architecture, scope and roadmap: [PLAN.md](./PLAN.md)
-- Status: **F1 completed** — diagnose/normalize/anonymize + anonymized corpus
-  (`testdata/corpus`) with golden reports; CI (build/vet/test). Next: F2
-  (`internal/model` + Huma emit MVP).
+- Status: **F2 completed** — full `gen` pipeline (ingest → diagnose → client →
+  model → Huma emit) with golden tests and an end-to-end test that builds and
+  tests the generated gateway. Next: F3 (auth/state hooks, `internal/verify`).
+
+## Install
+
+```sh
+go install github.com/enuan/enuan-soap-gen/cmd/enuan-soap-gen@latest
+```
+
+## Usage
+
+```sh
+# Diagnose a WSDL (no output written).
+enuan-soap-gen diagnose -i wsdl/chat.wsdl --fail-on error
+
+# Generate client + gateway in the current module.
+cat > soapgen.yaml <<'YAML'
+service: chat
+wsdl: wsdl/chat.wsdl
+module: github.com/enuan/chat-gateway
+YAML
+enuan-soap-gen gen --config soapgen.yaml
+```
+
+`gen` runs: ingest → diagnose (fails on `error` findings) → `soap gen
+--client` → model extraction → emission → `go mod tidy`. Flags:
+`--client-only`, `--skip-client`, `--no-tidy`.
+
+### Generated project
+
+| Path | Content |
+|---|---|
+| `internal/soap/<service>/` | soap-go client (types + methods) |
+| `internal/api/operations_gen.go` | DTOs, bidirectional converters, `huma.Register` per operation, `mapSOAPError` |
+| `internal/api/hooks.go` | written **once**, never overwritten: `SessionProvider`, `StateMapper` |
+| `internal/api/operations_gen_test.go` | marshal assertions + handler round-trip over `httptest` |
+| `internal/config/config_gen.go` | confoo configuration (WSDL endpoint as default) |
+| `cmd/<gateway>/main.go` | web-go + humagin server, m3-go/log |
+| `Makefile`, `go.mod` | pinned runtime stack, `gen`/`verify` targets |
+
+Every operation becomes `POST /api/<camelCaseOperation>` (configurable through
+`operations.http`); SOAP faults map to `502`, timeouts to `504`.
+
+### `soapgen.yaml`
+
+```yaml
+service: rtws
+wsdl: wsdl/rtservice.wsdl
+module: github.com/enuan/infocar-rtws-go
+base_path: /api
+soap_go: github.com/enuan/soap-go
+soap_bin: ""              # empty: go run github.com/enuan/soap-go/cmd/soap
+operations:
+  include: [Login, GetVersion]     # empty = all
+  http:
+    default: { method: POST, path: "/{operation}" }
+auth:
+  strategy: login                  # none | login | header  (wired in F3)
+error_map:
+  state:                           # application state inside HTTP 200 (F3)
+    success_field: Successo
+naming:
+  json: camel                      # camel | preserve
+```
+
+## Development
+
+```sh
+make ci                          # build + vet + test
+make golden                      # refresh diagnose/emit golden files
+make testdata-regen SOAP_BIN=... # refresh testdata/clients fixtures (needs soap CLI)
+make e2e SOAP_BIN=...            # unit + end-to-end (needs network)
+```
+
+Test strategy:
+
+- `testdata/corpus/`: anonymized public WSDLs (see its README for the policy);
+- `testdata/clients/`: committed soap-go clients, so model/emit tests run
+  without the CLI; `SOAPGEN_E2E=1` regenerates and diffs them;
+- `testdata/golden/`: deterministic expectations for diagnose reports and the
+  generated `operations_gen.go`.

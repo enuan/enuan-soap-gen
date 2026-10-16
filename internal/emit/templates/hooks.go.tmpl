@@ -1,0 +1,32 @@
+// Generated once by enuan-soap-gen; this file is yours to edit.
+//
+// The generator never overwrites it, so implement the per-service semantics
+// here (session handling, application state mapping, credentials).
+
+package api
+
+import "context"
+
+// SessionProvider supplies the SOAP session token.
+//
+// Wire it in Service.Hooks when soapgen.yaml sets auth.strategy=login.
+type SessionProvider interface {
+	// Session returns a valid session token, logging in when needed.
+	Session(ctx context.Context) (string, error)
+	// Invalidate drops a cached token (e.g. after an application-level
+	// "session expired" response).
+	Invalidate(ctx context.Context, token string)
+}
+
+// StateMapper converts application-level state carried inside successful
+// responses into an error (soapgen.yaml error_map).
+type StateMapper interface {
+	// MapState returns nil when the state represents success.
+	MapState(ctx context.Context, state any) error
+}
+
+// Hooks groups the per-service implementations injected into the handlers.
+type Hooks struct {
+	Session SessionProvider
+	State   StateMapper
+}

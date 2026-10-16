@@ -1,6 +1,7 @@
 GO ?= go
+SOAP_BIN ?= soap
 
-.PHONY: build test vet fmt golden corpus-regen ci
+.PHONY: build test vet fmt golden testdata-regen e2e ci
 
 build:
 	$(GO) build ./...
@@ -14,9 +15,20 @@ vet:
 fmt:
 	gofmt -w cmd internal
 
-# Regenerate the deterministic diagnose golden reports.
+# Regenerate the deterministic golden files (diagnose reports, emit output).
 golden:
 	$(GO) test ./internal/diagnose -run TestGoldenReports -update
+	$(GO) test ./internal/emit -update
+
+# Regenerate the committed soap-go client fixtures (testdata/clients) used by
+# the model and emit tests.
+testdata-regen:
+	SOAPGEN_E2E=1 UPDATE_FIXTURES=1 SOAP_BIN="$(SOAP_BIN)" $(GO) test ./internal/model -run TestClientFixturesMatchGenerator
+	$(MAKE) golden
+
+# End-to-end tests: need the soap-go CLI (SOAP_BIN) and the network.
+e2e:
+	SOAPGEN_E2E=1 SOAP_BIN="$(SOAP_BIN)" $(GO) test ./internal/model ./internal/emit
 
 # Regenerate the public WSDL corpus from the partner originals.
 #

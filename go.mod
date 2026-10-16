@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/enuan/soap-go v0.29.2-enuan.1
 	github.com/spf13/cobra v1.10.2
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
