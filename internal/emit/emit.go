@@ -26,7 +26,7 @@ var dependencyVersions = []dependency{
 	{"github.com/enuan/gonfoo", "v0.0.0-20260910151220-6fe501af83c6"},
 	{"github.com/enuan/m3-go", "v0.0.0-20261014092316-ee743e500f83"},
 	{"github.com/enuan/soap-go", "v0.29.2-enuan.1"},
-	{"github.com/enuan/web-go", "v0.0.0-20260925140115-58322663abb8"},
+	{"github.com/enuan/web-go", "v0.0.0-20261016160103-a77943278355"},
 	{"github.com/gin-gonic/gin", "v1.12.0"},
 }
 
