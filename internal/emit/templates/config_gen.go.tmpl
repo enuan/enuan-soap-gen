@@ -28,9 +28,10 @@ func Load() Config {
 		Endpoint:   {{ quote .Model.Endpoint }},
 		Timeout:    {{ .Config.TimeoutSeconds }} * time.Second,
 		MaxRetries: {{ .Config.DefaultRetries }},
-		// Without a config file the gateway listens on :8080 (all interfaces).
-		// Set host/port in the confoo document to change it; port: 0 asks the
-		// kernel for an ephemeral port.
+		// Without a config file the gateway listens on 127.0.0.1:8080.
+		// Set host/port in the confoo document to change it; host: "" binds
+		// all interfaces, port: 0 asks the kernel for an ephemeral port.
+		Host: "127.0.0.1",
 		Port: 8080,
 	}
 	confoo.Configure({{ quote .Config.ConfigPath }}, &cfg)
