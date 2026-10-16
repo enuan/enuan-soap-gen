@@ -108,6 +108,12 @@ func TestRunChatService(t *testing.T) {
 		}
 	}
 
+	// The generated config defaults to :8080 when no confoo document is present.
+	configGen := readFile(t, filepath.Join(root, "internal", "config", "config_gen.go"))
+	if !strings.Contains(configGen, "Port: 8080") {
+		t.Errorf("config_gen.go does not default the port to 8080")
+	}
+
 	// hooks.go is written once and never overwritten.
 	hooks := filepath.Join(root, "internal", "api", "hooks.go")
 	custom := "// custom hook wiring\n"
