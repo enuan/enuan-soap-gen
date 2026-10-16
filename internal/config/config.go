@@ -175,11 +175,12 @@ func (c *Config) installName() string {
 	return sanitizeName(c.Service)
 }
 
+// gatewayName is the command directory name (and therefore the binary name):
+// the configured gateway, with only path-hostile characters replaced. Hyphens
+// are preserved, so "uvetgbt-soap-gateway" really produces
+// cmd/uvetgbt-soap-gateway and a binary with that name.
 func (c *Config) gatewayName() string {
-	if c.Gateway != "" {
-		return sanitizeName(c.Gateway)
-	}
-	return c.installName() + "-gateway"
+	return sanitizePathSegment(c.Gateway)
 }
 
 // PackageName is the Go package name of the generated SOAP client.
@@ -291,6 +292,25 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("wsdl %s: %w", c.WSDL, err)
 	}
 	return nil
+}
+
+// sanitizePathSegment keeps a configured name usable as a directory and
+// binary name: characters that are unsafe in a path are replaced with '-' and
+// leading/trailing separators are trimmed. Hyphens survive on purpose.
+func sanitizePathSegment(name string) string {
+	s := strings.Map(func(r rune) rune {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9',
+			r == '-', r == '_', r == '.':
+			return r
+		}
+		return '-'
+	}, strings.TrimSpace(name))
+	s = strings.Trim(s, "-._")
+	if s == "" {
+		return "gateway"
+	}
+	return s
 }
 
 func sanitizeName(name string) string {

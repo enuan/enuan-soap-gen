@@ -85,7 +85,7 @@ func TestRunChatService(t *testing.T) {
 		filepath.Join("internal", "api", "hooks.go"),
 		filepath.Join("internal", "api", "operations_gen_test.go"),
 		filepath.Join("internal", "config", "config_gen.go"),
-		filepath.Join("cmd", "chat_service_gateway", "main.go"),
+		filepath.Join("cmd", "chat_service-gateway", "main.go"),
 		"Makefile",
 		"go.mod",
 	} {
