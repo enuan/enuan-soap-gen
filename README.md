@@ -9,4 +9,6 @@ REST layer wired with the enuan building blocks (`web-go`, `gonfoo`,
 `m3-go/log`), including OpenAPI, configuration scaffolding and tests.
 
 - Architecture, scope and roadmap: [PLAN.md](./PLAN.md)
-- Status: planning / pre-implementation (F0 in progress on `enuan/soap-go`).
+- Status: **F0 completed** — `github.com/enuan/soap-go` `v0.29.2-enuan.1`
+  (inheritance merge, simple-type recursion guard, binding dedup, single
+  module). Next: F1 (`internal/diagnose` + corpus).

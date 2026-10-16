@@ -206,7 +206,7 @@ CLI: `enuan-soap-gen gen|verify|diff` (binario `enuan-soap-gen`, alias `soapgen`
 
 | Fase | Contenuto | Stima |
 |---|---|---|
-| **F0** | fork `enuan/soap-go`: cherry-pick fix tnymlr + fix nostri + rebrand modulo | 3-4 gg |
+| **F0** ✅ | fork `enuan/soap-go`: cherry-pick fix tnymlr + fix nostri + rebrand modulo | fatto |
 | **F1** | `internal/diagnose` (check costrutti + golden) + normalizer di fallback | 1-2 gg |
 | **F2** | `internal/model` + `internal/emit` MVP (Huma + main/config) | 4-5 gg |
 | **F3** | hook auth/stato + `soapgen.yaml` + `internal/verify` con marshal assertions | 3-4 gg |
@@ -236,9 +236,10 @@ verifica dei fix (i test di [2]/[6] assumono il generatore corretto).
 | WSDL di fornitori con costrutti non supportati | rifiuto esplicito con motivo al passo [1] |
 | Drift del corpus WSDL | test in CI su ogni PR |
 
-## 9. Prerequisito: fork `enuan/soap-go` (F0)
+## 9. Fork `enuan/soap-go` (F0 — completato)
 
-Stato attuale (fatto):
+Stato: **completato**, tag `v0.29.2-enuan.1` (merge su `main`, branch
+`enuan/patchset` conservato per la gestione patch).
 
 - fork creato: `github.com/enuan/soap-go` (da `way-platform/soap-go`);
 - clone locale: `~/m3/projects/go/src/github.com/enuan/soap-go`;
@@ -280,3 +281,23 @@ Ordine di lavoro consigliato (minimizza i conflitti):
 3. rebrand a `module github.com/enuan/soap-go` (commit meccanico finale);
 4. tag `v0.29.2-enuan.1`, merge `enuan/patchset` → `main`, push;
 5. apertura PR upstream (facoltativa, costo basso, aspettativa zero).
+
+### Esito F0
+
+- Cherry-pick: 21 commit da `tnymlr/main` + 2 commit di fixup import (tutti con
+  `-x`, provenienza in history).
+- 3 fix enuan, uno per commit, ciascuno con golden di regressione:
+  - `377d756` inheritance merge → `testdata/complex_content_extension`;
+  - `a81d642` simpleType auto-referenziale → `testdata/self_referential_simple_type`;
+  - `089c42f` dedup binding SOAP 1.1 → `testdata/duplicate_soap11_bindings`.
+- Rebrand `github.com/enuan/soap-go` (commit `a4d0c64`), esempi rigenerati
+  (`aa38c5f`), tag annotato `v0.29.2-enuan.1`, merge `fce7091` su `main`.
+- Verifica su WSDL reali con il CLI del fork: ChatService **raw** (senza
+  sanitize) genera senza stack overflow e con 1 solo metodo `Echo`; Tagliandi
+  ha `BaseContext.SessionId`; RTWS ha `RTDaTargaResult.State`; i tre package
+  generati compilano e passano `go vet`.
+- Distribuzione verificata: `go list -m` risolve via proxy pubblico e
+  `go install github.com/enuan/soap-go/cmd/soap@v0.29.2-enuan.1` produce
+  `soap version v0.29.2-enuan.1` (il bug del nested module è risolto).
+- Conseguenza per il piano: lo stadio [2] resta `diagnose` (non `normalize`);
+  `sanitize`/`flatten` non sono più necessari sul percorso default.
