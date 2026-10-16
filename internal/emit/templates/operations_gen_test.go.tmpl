@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -42,9 +43,13 @@ func Test{{ .Operation.Name }}RequestMarshals(t *testing.T) {
 }
 
 func Test{{ .Operation.Name }}Handler(t *testing.T) {
-	var gotAction string
+	var (
+		gotAction string
+		gotBody   []byte
+	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotAction = r.Header.Get("SOAPAction")
+		gotBody, _ = io.ReadAll(r.Body)
 		resp := &soapclient.{{ .Operation.Output.GoType }}{}
 		fillStringFields(resp)
 		payload, err := xml.Marshal(resp)
@@ -62,6 +67,9 @@ func Test{{ .Operation.Name }}Handler(t *testing.T) {
 		t.Fatal(err)
 	}
 	svc := &Service{Client: client}
+{{- if .SessionInject }}
+	svc.Hooks = Hooks{Session: &stubSession{token: "test-token"}}
+{{- end }}
 	out, err := svc.handle{{ .Operation.Name }}(context.Background(), &{{ .InputType }}{Body: {{ .RequestType }}{}})
 	if err != nil {
 		t.Fatal(err)
@@ -74,21 +82,120 @@ func Test{{ .Operation.Name }}Handler(t *testing.T) {
 		t.Errorf("SOAPAction = %q, want %q", gotAction, {{ quote .Operation.SOAPAction }})
 	}
 {{- end }}
+{{- if .SessionInject }}
+	if !strings.Contains(string(gotBody), "test-token") {
+		t.Errorf("SOAP request does not carry the session token: %s", gotBody)
+	}
+	if !strings.Contains(string(gotBody), {{ quote .SessionInject.Leaf.XMLName }}) {
+		t.Errorf("SOAP request is missing %s: %s", {{ quote .SessionInject.Leaf.XMLName }}, gotBody)
+	}
+{{- else }}
+	_ = gotBody
+{{- end }}
 }
+{{- if .StateTest }}
 
+func Test{{ .Operation.Name }}StateError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dto := &{{ .ResponseType }}{}
+{{ indentLines (.StateTest.AllocLines "dto") }}
+{{ indentLines (.StateTest.Assignments "dto") }}
+		payload, err := xml.Marshal({{ .ResponseToSOAP }}(dto))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body>%s</soap:Body></soap:Envelope>`, payload)
+	}))
+	defer srv.Close()
+
+	client, err := soapclient.NewClient(soap.WithEndpoint(srv.URL), soap.WithMaxRetries(1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc := &Service{Client: client}
+	_, err = svc.handle{{ .Operation.Name }}(context.Background(), &{{ .InputType }}{Body: {{ .RequestType }}{}})
+	if err == nil {
+		t.Fatal("expected the application state to produce an error")
+	}
+	if !strings.Contains(err.Error(), "state error") {
+		t.Errorf("error %q does not carry the state details", err)
+	}
+}
+{{- end }}
 {{ end }}
-// fillStringFields sets every top-level string, bool and integer field (and
-// their pointers) so that optional wrapper fields are present in the
-// marshaled XML.
+{{- if .Session }}
+
+// stubSession is the SessionProvider used by the generated tests.
+type stubSession struct{ token string }
+
+func (s *stubSession) Session(context.Context) (string, error) { return s.token, nil }
+
+func (s *stubSession) Invalidate(context.Context, string) {}
+
+func TestSessionProviderLogin(t *testing.T) {
+	var calls int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		body, _ := io.ReadAll(r.Body)
+		if !strings.Contains(string(body), "test-user") || !strings.Contains(string(body), "test-pass") {
+			t.Errorf("login request is missing the credentials: %s", body)
+		}
+		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body>`+{{ quote .Session.LoginResponseXML }}+`</soap:Body></soap:Envelope>`)
+	}))
+	defer srv.Close()
+
+	client, err := soapclient.NewClient(soap.WithEndpoint(srv.URL), soap.WithMaxRetries(1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	provider := NewSessionProvider(client, "test-user", "test-pass")
+	token, err := provider.Session(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if token != {{ quote .Session.TokenValue }} {
+		t.Fatalf("token = %q, want %s", token, {{ quote .Session.TokenValue }})
+	}
+	if _, err := provider.Session(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if calls != 1 {
+		t.Errorf("login called %d times, want 1 (the token must be cached)", calls)
+	}
+	provider.Invalidate(context.Background(), token)
+	if _, err := provider.Session(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if calls != 2 {
+		t.Errorf("login called %d times after Invalidate, want 2", calls)
+	}
+}
+{{- end }}
+
+// fillStringFields sets every string, bool and integer field (and their
+// pointers) so that optional fields are present in the marshaled XML. It
+// recurses into pointer/struct fields up to a depth limit and ignores cycles.
 func fillStringFields(v any) {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
 		return
 	}
-	rv = rv.Elem()
+	fillStruct(rv.Elem(), 0, map[reflect.Type]bool{})
+}
+
+func fillStruct(rv reflect.Value, depth int, seen map[reflect.Type]bool) {
 	if rv.Kind() != reflect.Struct {
 		return
 	}
+	typ := rv.Type()
+	if depth > 3 || seen[typ] {
+		return
+	}
+	seen[typ] = true
+	defer delete(seen, typ)
 	for i := 0; i < rv.NumField(); i++ {
 		f := rv.Field(i)
 		if !f.CanSet() {
@@ -97,22 +204,34 @@ func fillStringFields(v any) {
 		if f.Kind() == reflect.Ptr && f.IsNil() {
 			f.Set(reflect.New(f.Type().Elem()))
 		}
-		g := f
-		if g.Kind() == reflect.Ptr {
-			g = g.Elem()
-		}
-		if !g.CanSet() {
-			continue
-		}
-		switch g.Kind() {
+		switch f.Kind() {
 		case reflect.String:
-			g.SetString("x")
+			f.SetString("x")
 		case reflect.Bool:
-			g.SetBool(true)
+			f.SetBool(true)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			g.SetInt(1)
+			f.SetInt(1)
 		case reflect.Float32, reflect.Float64:
-			g.SetFloat(1)
+			f.SetFloat(1)
+		case reflect.Struct:
+			fillStruct(f, depth+1, seen)
+		case reflect.Ptr:
+			fillValue(f.Elem(), depth+1, seen)
 		}
+	}
+}
+
+func fillValue(rv reflect.Value, depth int, seen map[reflect.Type]bool) {
+	switch rv.Kind() {
+	case reflect.String:
+		rv.SetString("x")
+	case reflect.Bool:
+		rv.SetBool(true)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		rv.SetInt(1)
+	case reflect.Float32, reflect.Float64:
+		rv.SetFloat(1)
+	case reflect.Struct:
+		fillStruct(rv, depth, seen)
 	}
 }

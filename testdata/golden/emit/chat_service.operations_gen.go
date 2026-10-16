@@ -79,7 +79,8 @@ func (s *Service) handleOperation1(ctx context.Context, in *Operation1Input) (*O
 	if resp == nil {
 		return nil, huma.Error502BadGateway("SOAP call returned an empty response")
 	}
-	return &Operation1Output{Body: *echoResponseWrapperFromSOAP(resp)}, nil
+	out := &Operation1Output{Body: *echoResponseWrapperFromSOAP(resp)}
+	return out, nil
 }
 
 // Operation2Request is the REST body for the Operation2 SOAP operation.
@@ -111,7 +112,8 @@ func (s *Service) handleOperation2(ctx context.Context, in *Operation2Input) (*O
 	if resp == nil {
 		return nil, huma.Error502BadGateway("SOAP call returned an empty response")
 	}
-	return &Operation2Output{Body: *submitTravelRequestResponseWrapperFromSOAP(resp)}, nil
+	out := &Operation2Output{Body: *submitTravelRequestResponseWrapperFromSOAP(resp)}
+	return out, nil
 }
 
 // Operation3Request is the REST body for the Operation3 SOAP operation.
@@ -143,7 +145,8 @@ func (s *Service) handleOperation3(ctx context.Context, in *Operation3Input) (*O
 	if resp == nil {
 		return nil, huma.Error502BadGateway("SOAP call returned an empty response")
 	}
-	return &Operation3Output{Body: *approveTravelResponseResponseWrapperFromSOAP(resp)}, nil
+	out := &Operation3Output{Body: *approveTravelResponseResponseWrapperFromSOAP(resp)}
+	return out, nil
 }
 
 // Operation4Request is the REST body for the Operation4 SOAP operation.
@@ -175,7 +178,8 @@ func (s *Service) handleOperation4(ctx context.Context, in *Operation4Input) (*O
 	if resp == nil {
 		return nil, huma.Error502BadGateway("SOAP call returned an empty response")
 	}
-	return &Operation4Output{Body: *approveHotelResponseResponseWrapperFromSOAP(resp)}, nil
+	out := &Operation4Output{Body: *approveHotelResponseResponseWrapperFromSOAP(resp)}
+	return out, nil
 }
 
 // echoWrapperFromSOAP converts the REST request into its SOAP wrapper.

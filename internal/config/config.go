@@ -57,16 +57,19 @@ type HTTPRule struct {
 type Auth struct {
 	Strategy string      `yaml:"strategy"` // none | login | header
 	Login    LoginConfig `yaml:"login"`
-	Header   string      `yaml:"header"`
+	Header   string      `yaml:"header"` // HTTP header injected by strategy=header
 }
 
 // LoginConfig configures the login operation used by auth.strategy=login.
+// All field names are dotted Go paths relative to the request/response DTO of
+// the login operation (e.g. "Request.CompanyLogin", "LoginResult.SessionId").
 type LoginConfig struct {
-	Operation  string `yaml:"operation"`
-	TokenField string `yaml:"token_field"`
-	Username   string `yaml:"username"`
-	Password   string `yaml:"password"`
-	InjectInto string `yaml:"inject_into"` // context | token | field:<Name>
+	Operation     string   `yaml:"operation"`      // login SOAP operation
+	TokenField    string   `yaml:"token_field"`    // token path in the response DTO
+	UsernameField string   `yaml:"username_field"` // optional credentials paths
+	PasswordField string   `yaml:"password_field"`
+	Inject        string   `yaml:"inject"`      // token path in every other request DTO
+	SkipInject    []string `yaml:"skip_inject"` // operations that must not receive the token
 }
 
 // ErrorMap describes application-level error state inside HTTP 200 responses.
@@ -75,11 +78,21 @@ type ErrorMap struct {
 }
 
 // StateConfig configures the success/error fields of the application state.
+// The fields are looked up by Go name on every DTO reachable from a response;
+// a single configuration therefore covers differently nested result types.
 type StateConfig struct {
-	SuccessField string `yaml:"success_field"`
-	CodeField    string `yaml:"code_field"`
-	MessageField string `yaml:"message_field"`
-	ToHTTP       bool   `yaml:"to_http"`
+	SuccessField string `yaml:"success_field"` // bool (or *bool)
+	CodeField    string `yaml:"code_field"`    // optional
+	MessageField string `yaml:"message_field"` // optional
+	ToHTTP       *bool  `yaml:"to_http"`       // default true when success_field is set
+}
+
+// Enabled reports whether the state mapping must be generated and applied.
+func (s StateConfig) Enabled() bool {
+	if s.SuccessField == "" {
+		return false
+	}
+	return s.ToHTTP == nil || *s.ToHTTP
 }
 
 // Naming controls the generated JSON field names.
@@ -257,8 +270,22 @@ func (c *Config) Validate() error {
 	default:
 		return fmt.Errorf("auth.strategy %q is not supported (none|login|header)", c.Auth.Strategy)
 	}
-	if c.Auth.Strategy == "login" && c.Auth.Login.Operation == "" {
-		return fmt.Errorf("auth.login.operation is required when auth.strategy=login")
+	if c.Auth.Strategy == "login" {
+		if c.Auth.Login.Operation == "" {
+			return fmt.Errorf("auth.login.operation is required when auth.strategy=login")
+		}
+		if c.Auth.Login.TokenField == "" {
+			return fmt.Errorf("auth.login.token_field is required when auth.strategy=login")
+		}
+		if (c.Auth.Login.UsernameField == "") != (c.Auth.Login.PasswordField == "") {
+			return fmt.Errorf("auth.login.username_field and password_field must be set together")
+		}
+	}
+	if c.Auth.Strategy == "header" && c.Auth.Header == "" {
+		return fmt.Errorf("auth.header is required when auth.strategy=header")
+	}
+	if c.ErrorMap.State.SuccessField == "" && (c.ErrorMap.State.CodeField != "" || c.ErrorMap.State.MessageField != "") {
+		return fmt.Errorf("error_map.state.success_field is required when code_field or message_field are set")
 	}
 	if _, err := os.Stat(c.WSDLPath()); err != nil {
 		return fmt.Errorf("wsdl %s: %w", c.WSDL, err)

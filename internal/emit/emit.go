@@ -48,20 +48,22 @@ type Result struct {
 	Skipped []string
 }
 
+type outFile struct {
+	tmpl string
+	path string
+	isGo bool
+	once bool
+}
+
 // Run writes every generated file. Files that must not be overwritten
-// (hooks.go) are written only when missing.
+// (hooks.go, Makefile, go.mod) are written only when missing.
 func Run(opts Options) (*Result, error) {
 	v, err := newView(opts)
 	if err != nil {
 		return nil, err
 	}
 	res := &Result{}
-	files := []struct {
-		tmpl string
-		path string
-		isGo bool
-		once bool
-	}{
+	files := []outFile{
 		{"operations_gen.go.tmpl", filepath.Join(opts.Root, v.Config.APIDir, "operations_gen.go"), true, false},
 		{"hooks.go.tmpl", filepath.Join(opts.Root, v.Config.APIDir, "hooks.go"), true, true},
 		{"operations_gen_test.go.tmpl", filepath.Join(opts.Root, v.Config.APIDir, "operations_gen_test.go"), true, false},
@@ -69,6 +71,9 @@ func Run(opts Options) (*Result, error) {
 		{"main.go.tmpl", filepath.Join(opts.Root, v.Config.CmdDir, "main.go"), true, false},
 		{"Makefile.tmpl", filepath.Join(opts.Root, "Makefile"), false, true},
 		{"go.mod.tmpl", filepath.Join(opts.Root, "go.mod"), false, true},
+	}
+	if v.Session != nil {
+		files = append(files, outFile{"auth_gen.go.tmpl", filepath.Join(opts.Root, v.Config.APIDir, "auth_gen.go"), true, false})
 	}
 	for _, f := range files {
 		out, err := v.render(f.tmpl)
@@ -115,6 +120,9 @@ type view struct {
 	Operations   []*opView
 	Converters   []*converter
 	Dependencies []dependency
+	Session      *sessionView
+	State        *stateView
+	HeaderAuth   *headerAuthView
 }
 
 type opView struct {
@@ -128,8 +136,17 @@ type opView struct {
 	ResponseType      string
 	RequestConverter  string
 	ResponseConverter string
+	ResponseToSOAP    string
 	RequestXMLNames   []string
 	Summary           string
+	SessionInject     *accessor  // nil when the token must not be injected
+	ChecksState       bool       // response body has a generated CheckState
+	StateTest         *stateTest // fake failing response for the generated test
+}
+
+// headerAuthView drives the HTTP header interceptor (auth.strategy=header).
+type headerAuthView struct {
+	Header string
 }
 
 type converter struct {
@@ -162,6 +179,21 @@ func newView(opts Options) (*view, error) {
 		Dependencies: dependencyVersions,
 	}
 
+	ix := buildDTOIndex(opts.Model)
+	session, err := buildSession(cfg, opts.Model, ix)
+	if err != nil {
+		return nil, err
+	}
+	v.Session = session
+	if cfg.Auth.Strategy == "header" {
+		v.HeaderAuth = &headerAuthView{Header: cfg.Auth.Header}
+	}
+	state, err := buildState(cfg, opts.Model, ix)
+	if err != nil {
+		return nil, err
+	}
+	v.State = state
+
 	structNames := map[string]bool{}
 	for _, t := range opts.Model.Types {
 		structNames[t.Name] = true
@@ -193,7 +225,19 @@ func newView(opts Options) (*view, error) {
 			ResponseType:      respType,
 			RequestConverter:  lowerCamel(op.Input.GoType) + "ToSOAP",
 			ResponseConverter: lowerCamel(op.Output.GoType) + "FromSOAP",
+			ResponseToSOAP:    lowerCamel(op.Output.GoType) + "ToSOAP",
 			Summary:           summary(op),
+		}
+		if session != nil && op.Name != session.LoginName && !contains(cfg.Auth.Login.SkipInject, op.Name) && cfg.Auth.Login.Inject != "" {
+			acc, err := ix.resolvePath(reqType, cfg.Auth.Login.Inject)
+			if err != nil {
+				return nil, fmt.Errorf("auth.login.inject for operation %s: %w (add the operation to auth.login.skip_inject if it takes no session)", op.Name, err)
+			}
+			ov.SessionInject = acc
+		}
+		if state != nil {
+			ov.ChecksState = state.needsCheck(respType)
+			ov.StateTest = state.Tests[respType]
 		}
 		for _, f := range op.Input.Fields {
 			if f.XMLName != "" {
@@ -324,6 +368,7 @@ func (v *view) render(name string) ([]byte, error) {
 		"quote":       func(s string) string { return fmt.Sprintf("%q", s) },
 		"join":        strings.Join,
 		"indentLines": indentLines,
+		"allocLines":  allocLines,
 	}).ParseFS(templatesFS, "templates/"+name)
 	if err != nil {
 		return nil, err
@@ -336,6 +381,15 @@ func (v *view) render(name string) ([]byte, error) {
 }
 
 func indentLines(lines []string) string { return strings.Join(lines, "\n") }
+
+func contains(list []string, s string) bool {
+	for _, v := range list {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
 
 func lowerCamel(s string) string {
 	if s == "" {

@@ -3,6 +3,10 @@
 package main
 
 import (
+{{- if .HeaderAuth }}
+	"net/http"
+{{- end }}
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humagin"
 	"github.com/enuan/m3-go/log"
@@ -25,13 +29,37 @@ func main() {
 	if cfg.Debug {
 		opts = append(opts, soap.WithDebug())
 	}
+{{- if .HeaderAuth }}
+	if cfg.APIKey != "" {
+		opts = append(opts, soap.WithInterceptor(authHeaderInterceptor(cfg.APIKey)))
+	}
+{{- end }}
 	client, err := soapclient.NewClient(opts...)
 	if err != nil {
 		log.Panic("create SOAP client", "error", err)
 	}
+	svc := &restapi.Service{Client: client}
+{{- if .Session }}
+	svc.Hooks = restapi.Hooks{Session: restapi.NewSessionProvider(client, cfg.Username, cfg.Password)}
+{{- end }}
 	log.Info("starting {{ .Config.Gateway }}", "endpoint", cfg.Endpoint)
 	web.StartServer({{ quote .Config.Gateway }}, web.WebEngineConfig{Host: cfg.Host, Port: cfg.Port}, func(engine *gin.Engine) {
 		humaAPI := humagin.New(engine, huma.DefaultConfig({{ quote .Config.Title }}, "1.0.0"))
-		restapi.Register(humaAPI, &restapi.Service{Client: client})
+		restapi.Register(humaAPI, svc)
 	})
 }
+{{ if .HeaderAuth }}
+// authHeaderInterceptor adds the configured HTTP header to every SOAP request.
+func authHeaderInterceptor(value string) func(http.RoundTripper) http.RoundTripper {
+	return func(next http.RoundTripper) http.RoundTripper {
+		return roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+			req.Header.Set({{ quote .HeaderAuth.Header }}, value)
+			return next.RoundTrip(req)
+		})
+	}
+}
+
+type roundTripperFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
+{{ end }}

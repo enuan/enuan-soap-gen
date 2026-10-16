@@ -6,6 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+{{- if .State }}
+	"reflect"
+	"strings"
+{{- end }}
 
 	"github.com/danielgtaylor/huma/v2"
 	soap "{{ .Config.SoapGo }}"
@@ -62,7 +66,28 @@ type {{ .OutputType }} struct {
 	Body {{ .ResponseType }}
 }
 
+{{- if .SessionInject }}
+// applySession{{ .Operation.Name }} injects the SOAP session token into the request.
+func (s *Service) applySession{{ .Operation.Name }}(ctx context.Context, req *{{ .RequestType }}) error {
+	if s.Hooks.Session == nil {
+		return nil
+	}
+	token, err := s.Hooks.Session.Session(ctx)
+	if err != nil {
+		return err
+	}
+{{ indentLines (allocLines "req" .SessionInject) }}
+{{ indentLines (.SessionInject.WriteString "req" "token") }}
+	return nil
+}
+{{- end }}
+
 func (s *Service) handle{{ .Operation.Name }}(ctx context.Context, in *{{ .InputType }}) (*{{ .OutputType }}, error) {
+{{- if .SessionInject }}
+	if err := s.applySession{{ .Operation.Name }}(ctx, &in.Body); err != nil {
+		return nil, huma.Error502BadGateway("SOAP session: " + err.Error())
+	}
+{{- end }}
 	req := {{ .RequestConverter }}(&in.Body)
 	resp, err := s.Client.{{ .Operation.Method }}(ctx, req)
 	if err != nil {
@@ -71,7 +96,13 @@ func (s *Service) handle{{ .Operation.Name }}(ctx context.Context, in *{{ .Input
 	if resp == nil {
 		return nil, huma.Error502BadGateway("SOAP call returned an empty response")
 	}
-	return &{{ .OutputType }}{Body: *{{ .ResponseConverter }}(resp)}, nil
+	out := &{{ .OutputType }}{Body: *{{ .ResponseConverter }}(resp)}
+{{- if .ChecksState }}
+	if err := out.Body.CheckState(); err != nil {
+		return nil, err
+	}
+{{- end }}
+	return out, nil
 }
 {{ end }}
 
@@ -87,6 +118,60 @@ type {{ .Name }}DTO struct {
 }
 
 {{ end }}
+{{- if .State }}
+{{- range .State.Checks }}
+// CheckState maps the application-level state embedded in {{ .Type }} to an error.
+func (r *{{ .Type }}) CheckState() error {
+	if r == nil {
+		return nil
+	}
+{{- if .Success }}
+	if {{ if .Success.Pointer }}r.{{ .Success.GoName }} != nil && {{ end }}!{{ if .Success.Pointer }}*{{ end }}r.{{ .Success.GoName }} {
+		return huma.Error502BadGateway(stateMessage({{ if .Code }}r.{{ .Code.GoName }}{{ end }}{{ if and .Code .Message }}, {{ end }}{{ if .Message }}r.{{ .Message.GoName }}{{ end }}))
+	}
+{{- end }}
+{{- range .Nested }}
+	if err := r.{{ .GoName }}.CheckState(); err != nil {
+		return err
+	}
+{{- end }}
+	return nil
+}
+
+{{ end }}
+// stateMessage joins the application-level error details.
+func stateMessage(parts ...any) string {
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if v := stateString(p); v != "" {
+			out = append(out, v)
+		}
+	}
+	if len(out) == 0 {
+		return "SOAP operation failed"
+	}
+	return strings.Join(out, ": ")
+}
+
+// stateString renders a state field as a string, dereferencing pointers.
+func stateString(v any) string {
+	if v == nil {
+		return ""
+	}
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			return ""
+		}
+		rv = rv.Elem()
+	}
+	if rv.Kind() == reflect.String {
+		return rv.String()
+	}
+	return fmt.Sprintf("%v", rv.Interface())
+}
+{{- end }}
+
 {{ range .Converters }}
 // {{ .Name }} {{ .Doc }}.
 func {{ .Name }}(in *soapclient.{{ .SOAPType }}) *{{ .DTOType }} {

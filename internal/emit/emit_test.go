@@ -26,6 +26,12 @@ func project(t *testing.T, root, name string) (*config.Config, *model.Model) {
 		"wsdl: " + testutil.CorpusPath(t, name) + "\n" +
 		"module: example.com/" + name + "-gw\n" +
 		"gateway: " + name + "-gateway\n"
+	return projectConfig(t, root, yaml)
+}
+
+// projectConfig builds the config and the model from an explicit soapgen.yaml.
+func projectConfig(t *testing.T, root, yaml string) (*config.Config, *model.Model) {
+	t.Helper()
 	cfgPath := filepath.Join(root, "soapgen.yaml")
 	if err := os.WriteFile(cfgPath, []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
@@ -34,11 +40,33 @@ func project(t *testing.T, root, name string) (*config.Config, *model.Model) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	m, err := model.Build(cfg, testutil.ClientFixture(t, name))
+	m, err := model.Build(cfg, testutil.ClientFixture(t, cfg.PackageName()))
 	if err != nil {
 		t.Fatal(err)
 	}
 	return cfg, m
+}
+
+// tagliandiAuthYAML configures the tagliandi corpus with login auth and state
+// mapping; it is the F3 reference configuration.
+func tagliandiAuthYAML(t *testing.T) string {
+	return "service: tagliandi\n" +
+		"wsdl: " + testutil.CorpusPath(t, "tagliandi") + "\n" +
+		"module: example.com/tagliandi-gw\n" +
+		"gateway: tagliandi-gateway\n" +
+		"auth:\n" +
+		"  strategy: login\n" +
+		"  login:\n" +
+		"    operation: Operation1\n" +
+		"    token_field: LoginResult.SessionId\n" +
+		"    username_field: Request.CompanyLogin\n" +
+		"    password_field: Request.Password\n" +
+		"    inject: Context.SessionId\n" +
+		"error_map:\n" +
+		"  state:\n" +
+		"    success_field: Successo\n" +
+		"    code_field: CodiceErrore\n" +
+		"    message_field: Messaggio\n"
 }
 
 func TestRunChatService(t *testing.T) {
@@ -148,31 +176,220 @@ func TestRunNestedTypes(t *testing.T) {
 	}
 }
 
-// TestRunEndToEnd (SOAPGEN_E2E=1) generates a complete gateway project and
-// builds and tests it, proving that the generated code compiles and that the
+// TestRunAuthState checks the generated session/login and state-mapping code
+// with the tagliandi reference configuration, and that the generated project
+// builds and its generated tests pass (SOAPGEN_E2E=1).
+func TestRunAuthState(t *testing.T) {
+	root := t.TempDir()
+	cfg, m := projectConfig(t, root, tagliandiAuthYAML(t))
+	res, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m})
+	if err != nil {
+		t.Fatalf("emit.Run: %v", err)
+	}
+	written := map[string]bool{}
+	for _, f := range res.Written {
+		written[filepath.Base(f)] = true
+	}
+	if !written["auth_gen.go"] {
+		t.Fatal("auth_gen.go was not generated for auth.strategy=login")
+	}
+
+	apiDir := filepath.Join(root, "internal", "api")
+	auth := readFile(t, filepath.Join(apiDir, "auth_gen.go"))
+	for _, want := range []string{
+		"func NewSessionProvider(client *soapclient.Client, username, password string) SessionProvider",
+		"s.client.Operation1(ctx, loginWrapperToSOAP(req))",
+		"req.Request = &LoginRequestDTO{}",
+		"req.Request.CompanyLogin = &s.username",
+		"req.Request.Password = &s.password",
+		"if resp.LoginResult != nil && resp.LoginResult.SessionId != nil {",
+		"if token == " + "\"\" {",
+	} {
+		if !strings.Contains(auth, want) {
+			t.Errorf("auth_gen.go is missing %q", want)
+		}
+	}
+
+	ops := readFile(t, filepath.Join(apiDir, "operations_gen.go"))
+	for _, want := range []string{
+		"func (s *Service) applySessionOperation2(ctx context.Context, req *Operation2Request) error",
+		"req.Context = &BaseContextDTO{}",
+		"req.Context.SessionId = &token",
+		"if err := out.Body.CheckState(); err != nil {",
+		"func (r *IntervalsResultDTO) CheckState() error",
+		"func (r *Operation2Response) CheckState() error",
+		"func stateMessage(parts ...any) string",
+	} {
+		if !strings.Contains(ops, want) {
+			t.Errorf("operations_gen.go is missing %q", want)
+		}
+	}
+	if strings.Contains(ops, "applySessionOperation1") {
+		t.Error("the login operation must not inject its own token")
+	}
+
+	tests := readFile(t, filepath.Join(apiDir, "operations_gen_test.go"))
+	for _, want := range []string{
+		"func TestSessionProviderLogin(t *testing.T)",
+		"func TestOperation2StateError(t *testing.T)",
+		"type stubSession struct{ token string }",
+		"svc.Hooks = Hooks{Session: &stubSession{token: \"test-token\"}}",
+	} {
+		if !strings.Contains(tests, want) {
+			t.Errorf("operations_gen_test.go is missing %q", want)
+		}
+	}
+
+	main := readFile(t, filepath.Join(root, cfg.CmdDir, "main.go"))
+	if !strings.Contains(main, "svc.Hooks = restapi.Hooks{Session: restapi.NewSessionProvider(client, cfg.Username, cfg.Password)}") {
+		t.Error("main.go does not wire the session provider")
+	}
+	configGen := readFile(t, filepath.Join(root, "internal", "config", "config_gen.go"))
+	for _, want := range []string{"Username   string", "Password   string"} {
+		if !strings.Contains(configGen, want) {
+			t.Errorf("config_gen.go is missing %q", want)
+		}
+	}
+
+	if !testutil.E2E() {
+		t.Skip("generated project build requires SOAPGEN_E2E=1")
+	}
+	testutil.CopyDir(t, testutil.ClientFixture(t, "tagliandi"), filepath.Join(root, "internal", "soap", "tagliandi"))
+	goRun(t, root, "mod", "tidy")
+	goRun(t, root, "build", "./...")
+	goRun(t, root, "vet", "./...")
+	goRun(t, root, "test", "./...")
+}
+
+// TestRunAuthStateErrors checks the configuration errors of auth/error_map.
+func TestRunAuthStateErrors(t *testing.T) {
+	base := tagliandiAuthYAML(t)
+	cases := []struct {
+		name   string
+		yaml   string
+		errSub string
+	}{
+		{
+			name:   "unknown login operation",
+			yaml:   strings.Replace(base, "operation: Operation1", "operation: Nope", 1),
+			errSub: "not among the generated operations",
+		},
+		{
+			name:   "unknown token field",
+			yaml:   strings.Replace(base, "token_field: LoginResult.SessionId", "token_field: LoginResult.Nope", 1),
+			errSub: "LoginSeviceResultDTO has no field Nope",
+		},
+		{
+			name:   "inject path missing on an operation",
+			yaml:   strings.Replace(base, "inject: Context.SessionId", "inject: Nope.SessionId", 1),
+			errSub: "auth.login.inject for operation Operation2",
+		},
+		{
+			name: "state success field must be a bool",
+			yaml: strings.Replace(strings.Replace(base,
+				"success_field: Successo", "success_field: CodiceErrore", 1),
+				"code_field: CodiceErrore", "code_field: Successo", 1),
+			errSub: "a bool (or *bool) is required",
+		},
+		{
+			name:   "unknown state field",
+			yaml:   strings.Replace(base, "success_field: Successo", "success_field: Nope", 1),
+			errSub: "no generated type has a Nope field",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			root := t.TempDir()
+			cfgPath := filepath.Join(root, "soapgen.yaml")
+			if err := os.WriteFile(cfgPath, []byte(tc.yaml), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			cfg, err := config.Load(cfgPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			m, err := model.Build(cfg, testutil.ClientFixture(t, "tagliandi"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = emit.Run(emit.Options{Root: root, Config: cfg, Model: m})
+			if err == nil || !strings.Contains(err.Error(), tc.errSub) {
+				t.Fatalf("error = %v, want it to contain %q", err, tc.errSub)
+			}
+		})
+	}
+}
+
+// TestRunHeaderAuth checks the generated HTTP header interceptor.
+func TestRunHeaderAuth(t *testing.T) {
+	root := t.TempDir()
+	yaml := tagliandiAuthYAML(t)
+	yaml = strings.Replace(yaml, "  strategy: login", "  strategy: header\n  header: X-Api-Key", 1)
+	yaml = strings.Replace(yaml, "token_field: LoginResult.SessionId", "token_field: Unused", 1)
+	yaml = strings.Replace(yaml, "    username_field: Request.CompanyLogin\n", "", 1)
+	yaml = strings.Replace(yaml, "    password_field: Request.Password\n", "", 1)
+	yaml = strings.Replace(yaml, "    inject: Context.SessionId\n", "", 1)
+	cfg, m := projectConfig(t, root, yaml)
+	res, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m})
+	if err != nil {
+		t.Fatalf("emit.Run: %v", err)
+	}
+	for _, f := range res.Written {
+		if filepath.Base(f) == "auth_gen.go" {
+			t.Error("auth_gen.go must not be generated for auth.strategy=header")
+		}
+	}
+	main := readFile(t, filepath.Join(root, cfg.CmdDir, "main.go"))
+	for _, want := range []string{"authHeaderInterceptor", `req.Header.Set("X-Api-Key", value)`, "cfg.APIKey"} {
+		if !strings.Contains(main, want) {
+			t.Errorf("main.go is missing %q", want)
+		}
+	}
+}
+
+// TestRunEndToEnd (SOAPGEN_E2E=1) generates complete gateway projects and
+// builds and tests them, proving that the generated code compiles and that the
 // generated tests pass. It needs the network (module downloads).
 func TestRunEndToEnd(t *testing.T) {
 	if !testutil.E2E() {
 		t.Skip("set SOAPGEN_E2E=1 to run end-to-end tests")
 	}
-	root := t.TempDir()
-	cfg, m := project(t, root, "chat_service")
-	testutil.CopyDir(t, testutil.ClientFixture(t, "chat_service"), filepath.Join(root, "internal", "soap", "chat_service"))
-	if _, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m}); err != nil {
-		t.Fatalf("emit.Run: %v", err)
+	cases := []struct {
+		name string
+		yaml func(*testing.T) string
+	}{
+		{name: "chat_service", yaml: func(t *testing.T) string { return "" }},
+		{name: "tagliandi", yaml: tagliandiAuthYAML},
 	}
-	for _, args := range [][]string{
-		{"mod", "tidy"},
-		{"build", "./..."},
-		{"vet", "./..."},
-		{"test", "./..."},
-	} {
-		cmd := exec.Command("go", args...)
-		cmd.Dir = root
-		cmd.Stderr = os.Stderr
-		if out, err := cmd.Output(); err != nil {
-			t.Fatalf("go %s: %v\n%s", strings.Join(args, " "), err, out)
-		}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			root := t.TempDir()
+			var cfg *config.Config
+			var m *model.Model
+			if tc.yaml(t) == "" {
+				cfg, m = project(t, root, "chat_service")
+			} else {
+				cfg, m = projectConfig(t, root, tc.yaml(t))
+			}
+			testutil.CopyDir(t, testutil.ClientFixture(t, tc.name), filepath.Join(root, "internal", "soap", tc.name))
+			if _, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m}); err != nil {
+				t.Fatalf("emit.Run: %v", err)
+			}
+			goRun(t, root, "mod", "tidy")
+			goRun(t, root, "build", "./...")
+			goRun(t, root, "vet", "./...")
+			goRun(t, root, "test", "./...")
+		})
+	}
+}
+
+func goRun(t *testing.T, dir string, args ...string) {
+	t.Helper()
+	cmd := exec.Command("go", args...)
+	cmd.Dir = dir
+	cmd.Stderr = os.Stderr
+	if out, err := cmd.Output(); err != nil {
+		t.Fatalf("go %s: %v\n%s", strings.Join(args, " "), err, out)
 	}
 }
 

@@ -17,6 +17,9 @@ type Config struct {
 	Timeout    time.Duration `yaml:"timeout"`
 	MaxRetries int           `yaml:"max_retries"`
 	Debug      bool          `yaml:"debug"`
+	Username   string        `yaml:"username"`
+	Password   string        `yaml:"password"`
+	APIKey     string        `yaml:"api_key"`
 }
 
 // Load reads the configuration, applying the WSDL endpoint and safe defaults.
