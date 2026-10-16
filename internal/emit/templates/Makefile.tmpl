@@ -2,10 +2,8 @@
 
 SOAPGEN ?= go run github.com/enuan/enuan-soap-gen/cmd/enuan-soap-gen@latest
 SOAPGEN_CONFIG ?= soapgen.yaml
-BINARY ?= {{ .Config.Gateway }}
-BIN_DIR ?= bin
 
-.PHONY: gen gen-client verify build
+.PHONY: gen gen-client verify install
 
 gen:
 	$(SOAPGEN) gen --config $(SOAPGEN_CONFIG)
@@ -18,7 +16,8 @@ verify:
 	go vet ./...
 	go test ./...
 
-# Static build: no cgo is involved, so the binary runs on hosts with an older
-# glibc than the build machine (older Debian/Ubuntu hosts).
-build:
-	CGO_ENABLED=0 go build -trimpath -o $(BIN_DIR)/$(BINARY) ./{{ .Config.CmdDir }}
+# Static install into $(go env GOBIN) or $(go env GOPATH)/bin: CGO_ENABLED=0
+# keeps the binary independent from the build machine's glibc, so it also runs
+# on hosts with an older one (older Debian/Ubuntu).
+install:
+	CGO_ENABLED=0 go install -trimpath ./{{ .Config.CmdDir }}

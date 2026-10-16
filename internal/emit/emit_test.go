@@ -97,11 +97,11 @@ func TestRunChatService(t *testing.T) {
 	assertGolden(t, filepath.Join(root, "internal", "api", "operations_gen.go"),
 		filepath.Join("testdata", "golden", "emit", "chat_service.operations_gen.go"))
 
-	// The Makefile builds a static binary named after the configured gateway.
+	// The Makefile installs a static binary named after the configured gateway.
 	makefile := readFile(t, filepath.Join(root, "Makefile"))
 	for _, want := range []string{
-		"BINARY ?= chat_service-gateway",
-		"CGO_ENABLED=0 go build -trimpath -o $(BIN_DIR)/$(BINARY) ./cmd/chat_service-gateway",
+		".PHONY: gen gen-client verify install",
+		"CGO_ENABLED=0 go install -trimpath ./cmd/chat_service-gateway",
 	} {
 		if !strings.Contains(makefile, want) {
 			t.Errorf("Makefile is missing %q", want)
