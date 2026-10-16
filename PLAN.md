@@ -147,6 +147,9 @@ Regole di mapping REST:
 `go/format`; vedi l'Esito F2 per dettagli e limiti)*
 
 ### [6] verify
+- `enuan-soap-gen verify --config soapgen.yaml [--run-tests] [--json]`: check
+  strutturali sul progetto generato (client, DTO, `huma.Register`, auth,
+  error_map) e, opzionale, `go test ./...`; `gen` lo esegue a fine pipeline.
 - `go build ./...`, `go vet`, `go test`.
 - **Golden test** su WSDL normalizzato e file generati (corpus: ChatService,
   RTWS, Tagliandi).
@@ -232,8 +235,8 @@ internal/xmltree/            DOM a offset di byte (preserva prefissi/format)
 internal/clientgen/          wrapper del CLI fork
 internal/config/             caricamento/validazione soapgen.yaml
 internal/model/              estrazione wsdl/xsd + go/ast
-internal/emit/               template (Huma, config, main, Makefile) + go/format
-internal/verify/             (F3) build/golden/marshal assertions
+internal/emit/               template (Huma, config, main, auth, stato) + go/format
+internal/verify/             check strutturali + go test del progetto generato
 testdata/corpus/             corpus WSDL anonimizzato + README policy
 testdata/clients/            client soap-go generati (fixture dei test model/emit)
 testdata/golden/diagnose/    report attesi
@@ -251,7 +254,7 @@ CLI: `enuan-soap-gen gen|verify|diff` (binario `enuan-soap-gen`, alias `soapgen`
 | **F0** ✅ | fork `enuan/soap-go`: cherry-pick fix tnymlr + fix nostri + rebrand modulo | fatto |
 | **F1** ✅ | `internal/ingest` + `internal/diagnose` (regole + golden) + `internal/anonymize` + corpus anonimizzato + normalizer di fallback | fatto |
 | **F2** ✅ | `internal/model` + `internal/emit` MVP (Huma + main/config) + `internal/config` (`soapgen.yaml`) | fatto |
-| **F3** | hook auth/stato + `soapgen.yaml` + `internal/verify` con marshal assertions | 3-4 gg |
+| **F3** ✅ | hook auth/stato collegati da `soapgen.yaml` + `internal/verify` + marshal assertions generate | fatto |
 | **F4** | pilota end-to-end su `uvetgbt-soap-go` (Echo + un'operazione reale) | 2 gg |
 | **F5** | opzionale: DTO JSON dedicati, docs OpenAPI arricchite, array/flatten | variabile |
 
@@ -436,3 +439,69 @@ Prossimo (F3): `SessionProvider`/`StateMapper` collegati da `auth`/`error_map`,
 `internal/verify` (marshal assertions sui tipi risultato: Tagliandi
 `<SessionId>`, RTWS `State`, ChatService metodo singolo), poi F4 pilota
 `uvetgbt-soap-go`.
+
+### Esito F3 (completato)
+
+**Auth (`auth.strategy`)**
+
+- `login`: `internal/emit/session.go` risolve i path puntati del
+  `soapgen.yaml` (`token_field`, `username_field`/`password_field`, `inject`)
+  contro il grafo delle DTO, con errori fatali e azionabili (operazione/field
+  inesistente, leaf non stringa, `skip_inject` per le operazioni senza
+  sessione). Genera `internal/api/auth_gen.go`: `sessionProvider` lazy con
+  mutex (una sola login concorrente), token in cache, `Invalidate`, login via
+  `LoginWrapperToSOAP`/`FromSOAP` (riusa i converter), credenziali da confoo
+  (`username`/`password`). Ogni operazione non-login riceve un helper
+  `applySession<Op>` che alloca il path (es. `Context` → `BaseContextDTO`) e
+  inietta `&token`; `main.go` collega il provider a `Service.Hooks`.
+- `header`: `main.go` installa un interceptor soap-go che imposta
+  `auth.header` da `cfg.APIKey`.
+- `none`: niente codice aggiuntivo.
+
+**Error map (`error_map.state`)**
+
+- `internal/emit/state.go` cerca `success_field` (bool o `*bool`), `code_field`
+  e `message_field` **per nome** su tutte le DTO: una sola configurazione copre
+  risultati annidati con path diversi (`LoginSeviceResult.Successo`,
+  `IntervalsResult.Successo`, `Type2.Successo`, ...). Genera `CheckState()`
+  sui tipi che portano lo stato e, per propagazione, sui wrapper/annidati che
+  vi delegano; gli handler mappano lo stato fallito in 502 con
+  codice+messaggio (`stateMessage`/`stateString` con deref generico).
+  `to_http: false` disattiva la mappatura.
+
+**Test generati (marshal assertions reali)**
+
+- `TestSessionProviderLogin`: login vero contro un server httptest
+  (risposta XML costruita dalla config), verifica token, cache (1 sola login)
+  e `Invalidate`.
+- `Test<Op>Handler`: con `auth.login.inject` il test usa uno `stubSession` e
+  verifica che il corpo SOAP ricevuto contenga il token e l'elemento
+  `SessionId` — è l'assertion "Tagliandi GetIntervals contiene `<SessionId>`"
+  del piano, eseguita a runtime.
+- `Test<Op>StateError`: risposta finta con stato fallito (DTO costruita
+  convertita in SOAP) e verifica dell'errore 502 con i dettagli.
+- `fillStringFields` ora ricorsivo (pointer/struct, depth 4, guardia cicli)
+  così anche i campi annidati entrano nelle assertion.
+
+**`internal/verify` + CLI**
+
+- Check: un metodo client per operazione senza duplicati (regressione binding
+  doppi), `huma.Register` per operazione con OperationID atteso, ogni `<T>DTO`
+  referenziata dichiarata, wiring auth (header/login/inject per op), stato
+  (`CheckState` + chiamata negli handler), opzionale `go test ./...`.
+- Report deterministico testuale allineato + JSON (`--json`); `verify` esce
+  non-zero se qualche check fallisce. `gen` esegue il verify strutturale a
+  fine pipeline (e `--run-tests` lo estende ai test generati).
+
+**Verifiche**
+
+- Corpus tagliandi con login+stato: progetto generato compila, `go vet`
+  pulito, test generati verdi (login, iniezione, stato); `verify --run-tests`
+  verde; `make e2e` esteso a chat_service (semplice) e tagliandi
+  (auth+stato).
+- Pilota reale ChatService: pipeline completa `gen` → `verification passed`.
+- Test unitari: 5 casi di errore di configurazione (operazione/token/inject
+  inesistenti, success field non bool, nessun tipo con lo stato), 6 casi di
+  verify (progetto sano, wiring mancante, iniezione rimossa, register
+  rinominato, DTO mancante, metodo client duplicato, operazioni non
+  selezionate).

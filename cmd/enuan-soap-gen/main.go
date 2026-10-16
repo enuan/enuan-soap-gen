@@ -19,6 +19,7 @@ import (
 	"github.com/enuan/enuan-soap-gen/internal/emit"
 	"github.com/enuan/enuan-soap-gen/internal/ingest"
 	"github.com/enuan/enuan-soap-gen/internal/model"
+	"github.com/enuan/enuan-soap-gen/internal/verify"
 	"github.com/enuan/soap-go/wsdl"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +41,7 @@ func newRootCommand() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newDiagnoseCommand(), newNormalizeCommand(), newAnonymizeCommand(), newGenCommand(), newVersionCommand())
+	root.AddCommand(newDiagnoseCommand(), newNormalizeCommand(), newAnonymizeCommand(), newGenCommand(), newVerifyCommand(), newVersionCommand())
 	return root
 }
 
@@ -236,6 +237,7 @@ func newGenCommand() *cobra.Command {
 		clientOnly bool
 		skipClient bool
 		noTidy     bool
+		runTests   bool
 	)
 	cmd := &cobra.Command{
 		Use:   "gen",
@@ -311,6 +313,19 @@ func newGenCommand() *cobra.Command {
 					return fmt.Errorf("go mod tidy: %w", err)
 				}
 			}
+
+			// [6] verify
+			vreport, err := verify.Run(verify.Options{Config: cfg, RunTests: runTests})
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.ErrOrStderr(), vreport.Summary())
+			if err := vreport.WriteText(cmd.OutOrStdout()); err != nil {
+				return err
+			}
+			if vreport.Failed() {
+				return fmt.Errorf("verify: %s", vreport.Summary())
+			}
 			return nil
 		},
 	}
@@ -318,5 +333,47 @@ func newGenCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&clientOnly, "client-only", false, "only run the SOAP client generation")
 	cmd.Flags().BoolVar(&skipClient, "skip-client", false, "reuse the existing generated SOAP client")
 	cmd.Flags().BoolVar(&noTidy, "no-tidy", false, "skip go mod tidy")
+	cmd.Flags().BoolVar(&runTests, "run-tests", false, "run the generated tests during verify")
+	return cmd
+}
+
+func newVerifyCommand() *cobra.Command {
+	var (
+		configPath string
+		runTests   bool
+		asJSON     bool
+	)
+	cmd := &cobra.Command{
+		Use:   "verify",
+		Short: "Verify a generated gateway against its soapgen.yaml",
+		Long: "Checks the generated soap-go client, the Huma layer and the auth/state\n" +
+			"wiring; with --run-tests it also runs the generated marshal assertions.",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			cfg, err := config.Load(configPath)
+			if err != nil {
+				return err
+			}
+			report, err := verify.Run(verify.Options{Config: cfg, RunTests: runTests})
+			if err != nil {
+				return err
+			}
+			out := cmd.OutOrStdout()
+			if asJSON {
+				err = report.WriteJSON(out)
+			} else {
+				err = report.WriteText(out)
+			}
+			if err != nil {
+				return err
+			}
+			if report.Failed() {
+				return fmt.Errorf("verify: %s", report.Summary())
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&configPath, "config", "soapgen.yaml", "path to soapgen.yaml")
+	cmd.Flags().BoolVar(&runTests, "run-tests", false, "also run go test ./... in the generated project")
+	cmd.Flags().BoolVar(&asJSON, "json", false, "write the report as JSON")
 	return cmd
 }

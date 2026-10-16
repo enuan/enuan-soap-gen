@@ -9,9 +9,11 @@ REST layer wired with the enuan building blocks (`web-go`, `gonfoo`,
 `m3-go/log`), including OpenAPI, configuration scaffolding and tests.
 
 - Architecture, scope and roadmap: [PLAN.md](./PLAN.md)
-- Status: **F2 completed** — full `gen` pipeline (ingest → diagnose → client →
-  model → Huma emit) with golden tests and an end-to-end test that builds and
-  tests the generated gateway. Next: F3 (auth/state hooks, `internal/verify`).
+- Status: **F3 completed** — full `gen` pipeline (ingest → diagnose → client →
+  model → Huma emit → verify) with session auth, application-state mapping,
+  generated marshal assertions, structural verification and end-to-end tests
+  that build and test the generated gateway. Next: F4 (pilota
+  `uvetgbt-soap-go`).
 
 ## Install
 
@@ -35,8 +37,16 @@ enuan-soap-gen gen --config soapgen.yaml
 ```
 
 `gen` runs: ingest → diagnose (fails on `error` findings) → `soap gen
---client` → model extraction → emission → `go mod tidy`. Flags:
-`--client-only`, `--skip-client`, `--no-tidy`.
+--client` → model extraction → emission → `go mod tidy` → verify. Flags:
+`--client-only`, `--skip-client`, `--no-tidy`, `--run-tests`.
+
+Standalone verification of an already generated project:
+
+```sh
+enuan-soap-gen verify --config soapgen.yaml            # structural checks
+enuan-soap-gen verify --config soapgen.yaml --run-tests # + generated tests
+enuan-soap-gen verify --config soapgen.yaml --json      # machine readable
+```
 
 ### Generated project
 
@@ -45,7 +55,8 @@ enuan-soap-gen gen --config soapgen.yaml
 | `internal/soap/<service>/` | soap-go client (types + methods) |
 | `internal/api/operations_gen.go` | DTOs, bidirectional converters, `huma.Register` per operation, `mapSOAPError` |
 | `internal/api/hooks.go` | written **once**, never overwritten: `SessionProvider`, `StateMapper` |
-| `internal/api/operations_gen_test.go` | marshal assertions + handler round-trip over `httptest` |
+| `internal/api/auth_gen.go` | lazy login with cached token (`auth.strategy=login`) |
+| `internal/api/operations_gen_test.go` | marshal assertions, handler round-trip, login, token injection and state-error tests |
 | `internal/config/config_gen.go` | confoo configuration (WSDL endpoint as default) |
 | `cmd/<gateway>/main.go` | web-go + humagin server, m3-go/log |
 | `Makefile`, `go.mod` | pinned runtime stack, `gen`/`verify` targets |
