@@ -138,6 +138,7 @@ type opView struct {
 	ResponseConverter string
 	ResponseToSOAP    string
 	RequestXMLNames   []string
+	ResponseJSONName  string
 	Summary           string
 	SessionInject     *accessor  // nil when the token must not be injected
 	ChecksState       bool       // response body has a generated CheckState
@@ -244,6 +245,12 @@ func newView(opts Options) (*view, error) {
 				ov.RequestXMLNames = append(ov.RequestXMLNames, f.XMLName)
 			}
 		}
+		for _, f := range op.Output.Fields {
+			if f.JSONName != "" && !f.Array {
+				ov.ResponseJSONName = f.JSONName
+				break
+			}
+		}
 		v.Operations = append(v.Operations, ov)
 	}
 
@@ -252,6 +259,47 @@ func newView(opts Options) (*view, error) {
 		addConverter(t.Name, t.Name+"DTO", "converts "+t.Name, t.Fields)
 	}
 	return v, nil
+}
+
+// RequestJSON renders a JSON request body for the generated HTTP test: every
+// required field and every plain string field (nested structs/slices are
+// skipped).
+func (v *view) RequestJSON(fields []*model.Field) string {
+	parts := make([]string, 0, len(fields))
+	for _, f := range fields {
+		if f.Array || f.Kind == model.FieldStruct {
+			continue
+		}
+		if !f.Required && !isStringField(f) {
+			continue
+		}
+		val, ok := jsonLiteral(f)
+		if !ok {
+			continue
+		}
+		parts = append(parts, fmt.Sprintf("%q: %s", f.JSONName, val))
+	}
+	return "{" + strings.Join(parts, ", ") + "}"
+}
+
+// jsonLiteral returns a deterministic test value for a scalar DTO field.
+func jsonLiteral(f *model.Field) (string, bool) {
+	if f.Kind == model.FieldEnum {
+		if len(f.Enum) > 0 {
+			return fmt.Sprintf("%q", f.Enum[0]), true
+		}
+		return "", false
+	}
+	base := strings.TrimPrefix(f.GoType, "*")
+	switch {
+	case base == "string":
+		return `"x"`, true
+	case base == "bool":
+		return "true", true
+	case strings.HasPrefix(base, "int"), strings.HasPrefix(base, "uint"), strings.HasPrefix(base, "float"):
+		return "1", true
+	}
+	return "", false
 }
 
 func summary(op *model.Operation) string {
@@ -369,6 +417,7 @@ func (v *view) render(name string) ([]byte, error) {
 		"join":        strings.Join,
 		"indentLines": indentLines,
 		"allocLines":  allocLines,
+		"requestJSON": v.RequestJSON,
 	}).ParseFS(templatesFS, "templates/"+name)
 	if err != nil {
 		return nil, err

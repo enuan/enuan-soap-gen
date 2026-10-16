@@ -4,6 +4,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -13,6 +14,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humagin"
+	"github.com/gin-gonic/gin"
 	soap "{{ .Config.SoapGo }}"
 	soapclient "{{ .ClientImport }}"
 )
@@ -93,6 +97,49 @@ func Test{{ .Operation.Name }}Handler(t *testing.T) {
 	_ = gotBody
 {{- end }}
 }
+func Test{{ .Operation.Name }}HTTP(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := &soapclient.{{ .Operation.Output.GoType }}{}
+		fillStringFields(resp)
+		payload, err := xml.Marshal(resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body>%s</soap:Body></soap:Envelope>`, payload)
+	}))
+	defer srv.Close()
+
+	client, err := soapclient.NewClient(soap.WithEndpoint(srv.URL), soap.WithMaxRetries(1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	humaAPI := humagin.New(engine, huma.DefaultConfig("generated-test", "1.0.0"))
+	svc := &Service{Client: client}
+{{- if .SessionInject }}
+	svc.Hooks = Hooks{Session: &stubSession{token: "test-token"}}
+{{- end }}
+	Register(humaAPI, svc)
+
+	req := httptest.NewRequest(http.MethodPost, {{ quote .Path }}, strings.NewReader({{ quote (requestJSON .Operation.Input.Fields) }}))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	engine.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("POST %s = %d, want 200: %s", {{ quote .Path }}, rec.Code, rec.Body.String())
+	}
+	var out map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatalf("invalid JSON response: %v (%s)", err, rec.Body.String())
+	}
+{{- if .ResponseJSONName }}
+	if _, ok := out[{{ quote .ResponseJSONName }}]; !ok {
+		t.Errorf("response JSON has no %s field: %s", {{ quote .ResponseJSONName }}, rec.Body.String())
+	}
+{{- end }}
+}
 {{- if .StateTest }}
 
 func Test{{ .Operation.Name }}StateError(t *testing.T) {
@@ -125,6 +172,28 @@ func Test{{ .Operation.Name }}StateError(t *testing.T) {
 }
 {{- end }}
 {{ end }}
+func TestOpenAPI(t *testing.T) {
+	engine := gin.New()
+	humaAPI := humagin.New(engine, huma.DefaultConfig("generated-test", "1.0.0"))
+	Register(humaAPI, &Service{})
+	req := httptest.NewRequest(http.MethodGet, "/openapi.json", nil)
+	rec := httptest.NewRecorder()
+	engine.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /openapi.json = %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+	var doc struct {
+		Paths map[string]any `json:"paths"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &doc); err != nil {
+		t.Fatalf("invalid OpenAPI document: %v", err)
+	}
+{{- range .Operations }}
+	if _, ok := doc.Paths[{{ quote .Path }}]; !ok {
+		t.Errorf("OpenAPI document has no path %s", {{ quote .Path }})
+	}
+{{- end }}
+}
 {{- if .Session }}
 
 // stubSession is the SessionProvider used by the generated tests.

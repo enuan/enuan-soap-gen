@@ -153,6 +153,10 @@ Regole di mapping REST:
 - `go build ./...`, `go vet`, `go test`.
 - **Golden test** su WSDL normalizzato e file generati (corpus: ChatService,
   RTWS, Tagliandi).
+- **Test generati HTTP**: per ogni operazione un test che monta `gin` +
+  `humagin`, registra le operazioni e fa una richiesta JSON reale sulla rotta
+  (verifica 200 e campo di risposta); più un test su `/openapi.json` che
+  controlla i path esposti.
 - **Marshal assertions** (regressione dei bug noti):
   - Tagliandi: il marshal di `GetIntervals` contiene `<SessionId>`;
   - RTWS: i tipi risultato derivati contengono `State`;
@@ -255,7 +259,7 @@ CLI: `enuan-soap-gen gen|verify|diff` (binario `enuan-soap-gen`, alias `soapgen`
 | **F1** ✅ | `internal/ingest` + `internal/diagnose` (regole + golden) + `internal/anonymize` + corpus anonimizzato + normalizer di fallback | fatto |
 | **F2** ✅ | `internal/model` + `internal/emit` MVP (Huma + main/config) + `internal/config` (`soapgen.yaml`) | fatto |
 | **F3** ✅ | hook auth/stato collegati da `soapgen.yaml` + `internal/verify` + marshal assertions generate | fatto |
-| **F4** | pilota end-to-end su `uvetgbt-soap-go` (Echo + un'operazione reale) | 2 gg |
+| **F4** ✅ | pilota end-to-end su `uvetgbt-soap-go` (Echo + operazioni reali, smoke REST) | fatto |
 | **F5** | opzionale: DTO JSON dedicati, docs OpenAPI arricchite, array/flatten | variabile |
 
 Totale MVP (F0-F4): ~2,5-3 settimane. F0 è prerequisito di F1-F3 per la
@@ -505,3 +509,39 @@ Prossimo (F3): `SessionProvider`/`StateMapper` collegati da `auth`/`error_map`,
   verify (progetto sano, wiring mancante, iniezione rimossa, register
   rinominato, DTO mancante, metodo client duplicato, operazioni non
   selezionate).
+
+### Esito F4 (completato)
+
+Pilota in `~/m3/projects/go/src/github.com/enuan/uvetgbt-soap-go` (repo locale,
+nessun remote: contiene il WSDL partner con endpoint reali).
+
+- `soapgen.yaml`: `service: chat`, WSDL **non sanitizzato** (`wsdl/ChatService.dev.wsdl`),
+  `soap_go_version: v0.29.2-enuan.1`, `config_path: uvetgbt.soap`, JSON camelCase;
+  nessuna auth, nessun error_map (i payload sono `xs:string` opachi).
+- `enuan-soap-gen gen` end-to-end: clientgen dal CLI rilasciato → model → emit
+  → tidy → verify (`10 ok, 0 warnings, 0 failed`); il WSDL reale passa senza
+  sanitize grazie ai fix F0 (schema MS/`duration`, doppio binding SOAP 1.1).
+- `go build`/`go vet`/`go test ./...` verdi; `internal/api/hooks.go` resta
+  l'unico file manuale (stub vuoti, nessuna semantica aggiuntiva necessaria).
+- Smoke runtime con backend SOAP finto + config confoo (`CONFOO_CONFIG_FILE`):
+  - `POST /api/echo {"inputMessage":"hello gateway"}` → `200`
+    `{"echoResult":"Echo:hello gateway"}`;
+  - `POST /api/submitTravelRequest {"xmlRequest":"<Viaggio>…</Viaggio>"}` → `200`
+    con l'XML di business restituito (operazione reale);
+  - `POST /api/approveTravelResponse` → `200`;
+  - SOAP fault → `502` con `soap:Server: deliberate smoke-test fault`;
+  - backend più lento del `timeout` (2s) → `504` "SOAP call did not complete
+    in time";
+  - JSON malformato → `400` validation error di Huma;
+  - `GET /openapi.json` → `200` con i 4 path.
+- `AGENTS.md` del pilota riscritto: tabella dipendenze con le versioni
+  verificate, workflow di rigenerazione (`make gen`/`gen-client`/`verify`),
+  contratto SOAP+REST, layout, convenzioni, risultati di verifica e decision
+  log gosoap (la vecchia procedura di sanitizzazione manuale è storica).
+- Il generatore ha aggiunto i test generati **HTTP** e **OpenAPI** (vedi [6]):
+  il percorso REST→SOAP è ora asserito in ogni progetto generato, non solo a
+  mano nel pilota.
+
+Prossimo (F5, opzionale): PR upstream dei fix a `way-platform/soap-go`,
+arricchimento OpenAPI (descrizioni dei campi), gestione `RawXML`, nuovi
+servizi (RTWS, Tagliandi) come nuovi progetti generati.

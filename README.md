@@ -9,11 +9,11 @@ REST layer wired with the enuan building blocks (`web-go`, `gonfoo`,
 `m3-go/log`), including OpenAPI, configuration scaffolding and tests.
 
 - Architecture, scope and roadmap: [PLAN.md](./PLAN.md)
-- Status: **F3 completed** — full `gen` pipeline (ingest → diagnose → client →
+- Status: **F4 completed** — full `gen` pipeline (ingest → diagnose → client →
   model → Huma emit → verify) with session auth, application-state mapping,
-  generated marshal assertions, structural verification and end-to-end tests
-  that build and test the generated gateway. Next: F4 (pilota
-  `uvetgbt-soap-go`).
+  generated REST/marshal assertions, structural verification and a real pilot
+  (`uvetgbt-soap-go`: ChatService gateway, smoke-tested against a fake SOAP
+  backend). Next (optional): upstream PRs, richer OpenAPI docs, new services.
 
 ## Install
 
@@ -56,7 +56,7 @@ enuan-soap-gen verify --config soapgen.yaml --json      # machine readable
 | `internal/api/operations_gen.go` | DTOs, bidirectional converters, `huma.Register` per operation, `mapSOAPError` |
 | `internal/api/hooks.go` | written **once**, never overwritten: `SessionProvider`, `StateMapper` |
 | `internal/api/auth_gen.go` | lazy login with cached token (`auth.strategy=login`) |
-| `internal/api/operations_gen_test.go` | marshal assertions, handler round-trip, login, token injection and state-error tests |
+| `internal/api/operations_gen_test.go` | marshal assertions, handler round-trip, REST request per operation (`humagin` + JSON), OpenAPI document, login, token injection and state-error tests |
 | `internal/config/config_gen.go` | confoo configuration (WSDL endpoint as default) |
 | `cmd/<gateway>/main.go` | web-go + humagin server, m3-go/log |
 | `Makefile`, `go.mod` | pinned runtime stack, `gen`/`verify` targets |
