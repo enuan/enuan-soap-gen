@@ -428,7 +428,9 @@ Verifiche:
 - fixture `testdata/clients/` confrontate con il CLI `v0.29.2-enuan.1`
   (`SOAPGEN_E2E=1`), rigenerabili con `make testdata-regen`;
 - e2e: `make e2e` genera un progetto completo e vi esegue
-  `go mod tidy` + `go build` + `go vet` + `go test`; attivo in CI.
+  `go mod tidy` + `go build` + `go vet` + `go test` (locale: il progetto
+  generato importa lo stack enuan privato, non disponibile da GitHub Actions;
+  in CI gira `make ci`).
 
 Prossimo (F3): `SessionProvider`/`StateMapper` collegati da `auth`/`error_map`,
 `internal/verify` (marshal assertions sui tipi risultato: Tagliandi

@@ -26,7 +26,8 @@ testdata-regen:
 	SOAPGEN_E2E=1 UPDATE_FIXTURES=1 SOAP_BIN="$(SOAP_BIN)" $(GO) test ./internal/model -run TestClientFixturesMatchGenerator
 	$(MAKE) golden
 
-# End-to-end tests: need the soap-go CLI (SOAP_BIN) and the network.
+# End-to-end tests: need the soap-go CLI (SOAP_BIN), the network and access
+# to the private enuan modules imported by the generated project.
 e2e:
 	SOAPGEN_E2E=1 SOAP_BIN="$(SOAP_BIN)" $(GO) test ./internal/model ./internal/emit
 

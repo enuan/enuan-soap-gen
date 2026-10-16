@@ -81,8 +81,12 @@ naming:
 make ci                          # build + vet + test
 make golden                      # refresh diagnose/emit golden files
 make testdata-regen SOAP_BIN=... # refresh testdata/clients fixtures (needs soap CLI)
-make e2e SOAP_BIN=...            # unit + end-to-end (needs network)
+make e2e SOAP_BIN=...            # end-to-end: needs the soap CLI, the network
+                                 # and read access to the private enuan modules
 ```
+
+CI runs `make ci` only: the end-to-end tests generate a project that imports
+the private enuan stack (`m3-go`, `gonfoo`, `web-go`), so they are local-only.
 
 Test strategy:
 
