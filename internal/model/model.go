@@ -61,7 +61,12 @@ type Field struct {
 	Array       bool
 	ElemPointer bool
 	Required    bool
+	MinLength   int
 	MaxLength   int
+	Pattern     string
+	Minimum     string
+	Maximum     string
+	Default     string
 	Enum        []string
 	Doc         string
 }
@@ -201,7 +206,12 @@ func buildFields(ix *wsdlIndex, pkg *astPackage, goType, element string, cfg *co
 		if spec := specByName[af.XMLName]; spec != nil {
 			astByName[spec.XMLName] = true
 			field.Required = spec.MinOccurs != "0" && !spec.Nillable
+			field.MinLength = spec.MinLength
 			field.MaxLength = spec.MaxLength
+			field.Pattern = spec.Pattern
+			field.Minimum = spec.Minimum
+			field.Maximum = spec.Maximum
+			field.Default = spec.Default
 			field.Enum = spec.Enum
 			field.Doc = spec.Doc
 		} else {

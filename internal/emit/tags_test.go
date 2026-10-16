@@ -36,10 +36,39 @@ func TestTagsEnrichOpenAPI(t *testing.T) {
 			want:  []string{`format:"date-time"`},
 		},
 		{
+			name:  "xs:date and xs:time map to time.Time and get the date-time format",
+			field: &model.Field{JSONName: "day", GoType: "time.Time", Pointer: true},
+			want:  []string{`format:"date-time"`},
+		},
+		{
 			name:  "plain string keeps only json and maxLength",
 			field: &model.Field{JSONName: "plate", GoType: "string", Pointer: true, MaxLength: 8},
 			want:  []string{`json:"plate,omitempty"`, `maxLength:"8"`},
 			not:   []string{"format:", "example:", "enum:"},
+		},
+		{
+			name: "schema facets and documentation become tags",
+			field: &model.Field{
+				JSONName:  "plate",
+				GoType:    "*string",
+				Pointer:   true,
+				Doc:       "Vehicle plate in \"AA123BB\"\n  format.`x`",
+				Pattern:   `[A-Z]{2}[0-9]{3}[A-Z]{2}`,
+				MinLength: 7,
+				MaxLength: 8,
+				Minimum:   "0",
+				Maximum:   "99",
+				Default:   "AA000AA",
+			},
+			want: []string{
+				`doc:"Vehicle plate in 'AA123BB' format.'x'"`,
+				`pattern:"[A-Z]{2}[0-9]{3}[A-Z]{2}"`,
+				`minLength:"7"`,
+				`maxLength:"8"`,
+				`minimum:"0"`,
+				`maximum:"99"`,
+				`default:"AA000AA"`,
+			},
 		},
 	}
 

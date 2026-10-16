@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="SchemaDocs" targetNamespace="urn:test:schemadocs"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:test:schemadocs">
+  <types>
+    <xs:schema targetNamespace="urn:test:schemadocs" elementFormDefault="qualified">
+      <xs:simpleType name="PlateType">
+        <xs:restriction base="xs:string">
+          <xs:pattern value="[A-Z]{2}[0-9]{3}[A-Z]{2}"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="VinType">
+        <xs:restriction base="xs:string">
+          <xs:length value="17"/>
+          <xs:annotation>
+            <xs:documentation>VIN: exactly 17 characters.</xs:documentation>
+          </xs:annotation>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="YearType">
+        <xs:restriction base="xs:int">
+          <xs:minInclusive value="1900"/>
+          <xs:maxInclusive value="2100"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="GetVehicle">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="plate" type="tns:PlateType" minOccurs="0" default="AA000AA">
+              <xs:annotation>
+                <xs:documentation>Vehicle plate in "AA123BB"
+                  format.</xs:documentation>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="vin" type="tns:VinType" minOccurs="0"/>
+            <xs:element name="year" type="tns:YearType" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetVehicleResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="result" type="xs:string" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>Business XML payload.</xs:documentation>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </types>
+  <message name="GetVehicleIn"><part name="parameters" element="tns:GetVehicle"/></message>
+  <message name="GetVehicleOut"><part name="parameters" element="tns:GetVehicleResponse"/></message>
+  <portType name="VehiclePortType">
+    <operation name="GetVehicle">
+      <documentation>Looks up a vehicle by plate or VIN.</documentation>
+      <input message="tns:GetVehicleIn"/>
+      <output message="tns:GetVehicleOut"/>
+    </operation>
+  </portType>
+  <binding name="VehicleBinding" type="tns:VehiclePortType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <operation name="GetVehicle">
+      <soap:operation soapAction="urn:test:schemadocs/GetVehicle" style="document"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+  <service name="VehicleService">
+    <port name="VehiclePort" binding="tns:VehicleBinding">
+      <soap:address location="https://example.invalid/vehicle"/>
+    </port>
+  </service>
+</definitions>

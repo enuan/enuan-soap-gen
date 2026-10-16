@@ -45,7 +45,7 @@ func Register(api huma.API, svc *Service) {
 type {{ .RequestType }} struct {
 {{- range .Operation.Input.Fields }}
 {{- if .Doc }}
-	// {{ .Doc }}
+	// {{ comment .Doc }}
 {{- end }}
 	{{ .GoName }} {{ dtoExpr . }} `{{ tags . }}`
 {{- end }}
@@ -60,7 +60,7 @@ type {{ .InputType }} struct {
 type {{ .ResponseType }} struct {
 {{- range .Operation.Output.Fields }}
 {{- if .Doc }}
-	// {{ .Doc }}
+	// {{ comment .Doc }}
 {{- end }}
 	{{ .GoName }} {{ dtoExpr . }} `{{ tags . }}`
 {{- end }}
@@ -116,7 +116,7 @@ func (s *Service) handle{{ .Operation.Name }}(ctx context.Context, in *{{ .Input
 type {{ .Name }}DTO struct {
 {{- range .Fields }}
 {{- if .Doc }}
-	// {{ .Doc }}
+	// {{ comment .Doc }}
 {{- end }}
 	{{ .GoName }} {{ dtoExpr . }} `{{ tags . }}`
 {{- end }}
@@ -178,7 +178,7 @@ func stateString(v any) string {
 {{- end }}
 
 {{ range .Converters }}
-// {{ .Name }} {{ .Doc }}.
+// {{ .Name }} {{ comment .Doc }}.
 func {{ .Name }}(in *soapclient.{{ .SOAPType }}) *{{ .DTOType }} {
 	if in == nil {
 		return nil
@@ -190,7 +190,7 @@ func {{ .Name }}(in *soapclient.{{ .SOAPType }}) *{{ .DTOType }} {
 	return out
 }
 
-// {{ lowerCamel .SOAPType }}ToSOAP {{ .Doc }}.
+// {{ lowerCamel .SOAPType }}ToSOAP {{ comment .Doc }}.
 func {{ lowerCamel .SOAPType }}ToSOAP(in *{{ .DTOType }}) *soapclient.{{ .SOAPType }} {
 	if in == nil {
 		return nil

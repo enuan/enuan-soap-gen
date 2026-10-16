@@ -142,7 +142,12 @@ type fieldSpec struct {
 	MinOccurs string
 	MaxOccurs string
 	Nillable  bool
+	MinLength int
 	MaxLength int
+	Pattern   string
+	Minimum   string
+	Maximum   string
+	Default   string
 	Enum      []string
 	Doc       string
 }
@@ -229,6 +234,7 @@ func (ix *wsdlIndex) specForElement(e *xsd.Element) *fieldSpec {
 		MinOccurs: e.MinOccurs,
 		MaxOccurs: e.MaxOccurs,
 		Nillable:  e.Nillable,
+		Default:   e.Default,
 		Doc:       documentation(e.Annotation),
 	}
 	target := e
@@ -268,17 +274,71 @@ func (ix *wsdlIndex) applySimpleType(spec *fieldSpec, st *xsd.SimpleType) {
 	if st == nil || st.Restriction == nil {
 		return
 	}
-	for _, e := range st.Restriction.Enumerations {
+	r := st.Restriction
+	for _, e := range r.Enumerations {
 		spec.Enum = append(spec.Enum, e.Value)
 	}
-	if st.Restriction.MaxLength != nil {
-		if n, err := strconv.Atoi(st.Restriction.MaxLength.Value); err == nil {
+	if r.Length != nil {
+		if n, err := strconv.Atoi(r.Length.Value); err == nil {
+			spec.MinLength, spec.MaxLength = n, n
+		}
+	}
+	if r.MinLength != nil {
+		if n, err := strconv.Atoi(r.MinLength.Value); err == nil {
+			spec.MinLength = n
+		}
+	}
+	if r.MaxLength != nil {
+		if n, err := strconv.Atoi(r.MaxLength.Value); err == nil {
 			spec.MaxLength = n
 		}
+	}
+	spec.Pattern = joinPatterns(r.Patterns)
+	if r.MinInclusive != nil {
+		spec.Minimum = numericFacet(r.MinInclusive.Value)
+	}
+	if r.MaxInclusive != nil {
+		spec.Maximum = numericFacet(r.MaxInclusive.Value)
 	}
 	if spec.Doc == "" {
 		spec.Doc = documentation(st.Annotation)
 	}
+	if spec.Doc == "" {
+		spec.Doc = documentation(r.Annotation)
+	}
+}
+
+// joinPatterns merges the xs:pattern facets; JSON Schema allows a single
+// pattern, so multiple facets are combined with non-capturing groups.
+func joinPatterns(patterns []xsd.Pattern) string {
+	var parts []string
+	for i := range patterns {
+		if v := strings.TrimSpace(patterns[i].Value); v != "" {
+			parts = append(parts, v)
+		}
+	}
+	switch len(parts) {
+	case 0:
+		return ""
+	case 1:
+		return parts[0]
+	}
+	for i := range parts {
+		parts[i] = "(?:" + parts[i] + ")"
+	}
+	return strings.Join(parts, "|")
+}
+
+// numericFacet returns the facet value only when it is usable as a JSON Schema
+// number (XSD also allows date/duration bounds, which Huma cannot apply).
+func numericFacet(value string) string {
+	if value == "" {
+		return ""
+	}
+	if _, err := strconv.ParseFloat(value, 64); err != nil {
+		return ""
+	}
+	return value
 }
 
 func documentation(a *xsd.Annotation) string {

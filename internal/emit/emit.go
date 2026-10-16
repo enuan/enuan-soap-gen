@@ -415,6 +415,21 @@ func (v *view) Tags(f *model.Field) string {
 	if f.MaxLength > 0 {
 		tags = append(tags, fmt.Sprintf(`maxLength:"%d"`, f.MaxLength))
 	}
+	if f.MinLength > 0 {
+		tags = append(tags, fmt.Sprintf(`minLength:"%d"`, f.MinLength))
+	}
+	if f.Pattern != "" {
+		tags = append(tags, fmt.Sprintf(`pattern:%q`, f.Pattern))
+	}
+	if f.Minimum != "" {
+		tags = append(tags, fmt.Sprintf(`minimum:%q`, f.Minimum))
+	}
+	if f.Maximum != "" {
+		tags = append(tags, fmt.Sprintf(`maximum:%q`, f.Maximum))
+	}
+	if f.Default != "" {
+		tags = append(tags, fmt.Sprintf(`default:%q`, f.Default))
+	}
 	if len(f.Enum) > 0 && !enumHasComma(f.Enum) {
 		tags = append(tags, fmt.Sprintf(`enum:"%s"`, strings.Join(f.Enum, ",")))
 		if !strings.Contains(f.Enum[0], `"`) {
@@ -424,7 +439,19 @@ func (v *view) Tags(f *model.Field) string {
 	if format := xsdFormat(f); format != "" {
 		tags = append(tags, fmt.Sprintf(`format:%q`, format))
 	}
+	if doc := docTag(f.Doc); doc != "" {
+		tags = append(tags, fmt.Sprintf(`doc:%q`, doc))
+	}
 	return strings.Join(tags, " ")
+}
+
+// docTag makes WSDL documentation safe for a Go struct tag: quotes and
+// backticks would break the generated raw string literal, and newlines or
+// runs of spaces would make the emitted tags unreadable.
+func docTag(doc string) string {
+	doc = strings.ReplaceAll(doc, `"`, "'")
+	doc = strings.ReplaceAll(doc, "`", "'")
+	return strings.Join(strings.Fields(doc), " ")
 }
 
 func enumHasComma(values []string) bool {
@@ -438,11 +465,18 @@ func enumHasComma(values []string) bool {
 
 // xsdFormat maps the soap-go XSD helper types to JSON Schema formats.
 func xsdFormat(f *model.Field) string {
-	base := strings.TrimLeft(f.GoType, "*[]")
-	if base == "soap.XSDDateTime" {
+	switch strings.TrimLeft(f.GoType, "*[]") {
+	case "soap.XSDDateTime", "time.Time":
+		// xs:dateTime maps to soap.XSDDateTime, xs:date/xs:time to time.Time;
+		// both marshal to RFC 3339 in JSON.
 		return "date-time"
 	}
 	return ""
+}
+
+// commentText makes WSDL documentation safe for a Go line comment.
+func commentText(doc string) string {
+	return strings.Join(strings.Fields(doc), " ")
 }
 
 func (v *view) render(name string) ([]byte, error) {
@@ -451,6 +485,7 @@ func (v *view) render(name string) ([]byte, error) {
 		"dtoExpr":     v.DTOExpr,
 		"tags":        v.Tags,
 		"quote":       func(s string) string { return fmt.Sprintf("%q", s) },
+		"comment":     commentText,
 		"join":        strings.Join,
 		"indentLines": indentLines,
 		"allocLines":  allocLines,

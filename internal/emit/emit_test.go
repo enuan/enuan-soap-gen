@@ -123,6 +123,48 @@ func TestRunChatService(t *testing.T) {
 	}
 }
 
+// TestRunSchemaDocs renders a fixture whose WSDL carries documentation and
+// XSD facets, and checks they are emitted as DTO field tags.
+func TestRunSchemaDocs(t *testing.T) {
+	root := t.TempDir()
+	clientDir := filepath.Join(testutil.ModuleRoot(t), "internal", "model", "testdata", "schema_docs")
+	yaml := "service: schemadocs\n" +
+		"wsdl: " + filepath.Join(clientDir, "definitions.wsdl") + "\n" +
+		"module: example.com/schemadocs-gw\n" +
+		"gateway: schemadocs-gateway\n"
+	cfgPath := filepath.Join(root, "soapgen.yaml")
+	if err := os.WriteFile(cfgPath, []byte(yaml), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := config.Load(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := model.Build(cfg, clientDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m}); err != nil {
+		t.Fatalf("emit.Run: %v", err)
+	}
+	ops := readFile(t, filepath.Join(root, "internal", "api", "operations_gen.go"))
+	for _, want := range []string{
+		`doc:"Vehicle plate in 'AA123BB' format."`,
+		`pattern:"[A-Z]{2}[0-9]{3}[A-Z]{2}"`,
+		`minLength:"17"`,
+		`maxLength:"17"`,
+		`minimum:"1900"`,
+		`maximum:"2100"`,
+		`default:"AA000AA"`,
+		`doc:"VIN: exactly 17 characters."`,
+		`doc:"Business XML payload."`,
+	} {
+		if !strings.Contains(ops, want) {
+			t.Errorf("operations_gen.go is missing %s", want)
+		}
+	}
+}
+
 // TestRunNestedTypes checks that every DTO type referenced by the generated
 // converters is declared (regression: missing declarations for nested types).
 func TestRunNestedTypes(t *testing.T) {
