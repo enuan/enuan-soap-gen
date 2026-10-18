@@ -9,6 +9,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humagin"
+	"github.com/enuan/m3-go/core"
 	"github.com/enuan/m3-go/log"
 	"github.com/enuan/web-go"
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ import (
 )
 
 func main() {
+	core.HandleVersionParse()
 	cfg := appconfig.Load()
 	opts := []soap.ClientOption{
 		soap.WithEndpoint(cfg.Endpoint),

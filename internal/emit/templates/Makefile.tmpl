@@ -3,6 +3,13 @@
 SOAPGEN ?= go run github.com/enuan/enuan-soap-gen/cmd/enuan-soap-gen@latest
 SOAPGEN_CONFIG ?= soapgen.yaml
 
+# Version stamped into the binary via m3-go/core ldflags; override to reproduce
+# a build. Empty git info (e.g. no checkout) leaves core's "unknown".
+GIT_HASH ?= $(shell git rev-parse --verify HEAD 2>/dev/null)
+COMMIT_TIME ?= $(shell git show -s --format=%ci HEAD 2>/dev/null)
+LDFLAGS ?= -X 'github.com/enuan/m3-go/core.buildHash=$(GIT_HASH)' \
+           -X 'github.com/enuan/m3-go/core.buildTime=$(COMMIT_TIME)'
+
 .PHONY: gen gen-client verify install
 
 gen:
@@ -16,8 +23,9 @@ verify:
 	go vet ./...
 	go test ./...
 
-# Static install into $(go env GOBIN) or $(go env GOPATH)/bin: CGO_ENABLED=0
-# keeps the binary independent from the build machine's glibc, so it also runs
-# on hosts with an older one (older Debian/Ubuntu).
+# Static install into $(go env GOBIN) or $(go env GOPATH)/bin.
+# The version (commit hash and commit time) is stamped with ldflags, so the
+# startup log and -version report the build; CGO_ENABLED=0 keeps the binary
+# independent from the build machine's glibc (older Debian/Ubuntu hosts).
 install:
-	CGO_ENABLED=0 go install -trimpath ./{{ .Config.CmdDir }}
+	CGO_ENABLED=0 go install -trimpath -ldflags "$(LDFLAGS)" ./{{ .Config.CmdDir }}

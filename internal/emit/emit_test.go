@@ -101,7 +101,8 @@ func TestRunChatService(t *testing.T) {
 	makefile := readFile(t, filepath.Join(root, "Makefile"))
 	for _, want := range []string{
 		".PHONY: gen gen-client verify install",
-		"CGO_ENABLED=0 go install -trimpath ./cmd/chat_service-gateway",
+		"CGO_ENABLED=0 go install -trimpath -ldflags \"$(LDFLAGS)\" ./cmd/chat_service-gateway",
+		"github.com/enuan/m3-go/core.buildHash",
 	} {
 		if !strings.Contains(makefile, want) {
 			t.Errorf("Makefile is missing %q", want)
@@ -115,6 +116,12 @@ func TestRunChatService(t *testing.T) {
 		if !strings.Contains(configGen, want) {
 			t.Errorf("config_gen.go is missing the default %s", want)
 		}
+	}
+
+	// The generated main exposes the m3-go version flag.
+	main := readFile(t, filepath.Join(root, "cmd", "chat_service-gateway", "main.go"))
+	if !strings.Contains(main, "core.HandleVersionParse()") {
+		t.Error("generated main.go does not call core.HandleVersionParse()")
 	}
 
 	// hooks.go is written once and never overwritten.
