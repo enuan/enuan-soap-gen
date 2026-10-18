@@ -46,7 +46,13 @@ func main() {
 {{- end }}
 	log.Info("starting {{ .Config.Gateway }}", "endpoint", cfg.Endpoint)
 	web.StartServer({{ quote .Config.Gateway }}, web.WebEngineConfig{Host: cfg.Host, Port: cfg.Port}, func(engine *gin.Engine) {
-		humaAPI := humagin.New(engine, huma.DefaultConfig({{ quote .Config.Title }}, "1.0.0"))
+		humaConfig := huma.DefaultConfig({{ quote .Config.Title }}, "1.0.0")
+		// Drop Huma's schema-link transformer: it adds a `$schema` property to
+		// every response schema (with a placeholder example.com URL), a Link
+		// header and a $schema field in the response bodies. This gateway does
+		// not need them; the JSON contract is the DTO only.
+		humaConfig.CreateHooks = nil
+		humaAPI := humagin.New(engine, humaConfig)
 		restapi.Register(humaAPI, svc)
 	})
 }

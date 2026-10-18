@@ -120,8 +120,10 @@ func TestRunChatService(t *testing.T) {
 
 	// The generated main exposes the m3-go version flag.
 	main := readFile(t, filepath.Join(root, "cmd", "chat_service-gateway", "main.go"))
-	if !strings.Contains(main, "core.HandleVersionParse()") {
-		t.Error("generated main.go does not call core.HandleVersionParse()")
+	for _, want := range []string{"core.HandleVersionParse()", "humaConfig.CreateHooks = nil"} {
+		if !strings.Contains(main, want) {
+			t.Errorf("generated main.go is missing %q", want)
+		}
 	}
 
 	// hooks.go is written once and never overwritten.
