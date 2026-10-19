@@ -172,6 +172,25 @@ func Test{{ .Operation.Name }}StateError(t *testing.T) {
 }
 {{- end }}
 {{ end }}
+{{- if ne .Config.MaxBodyBytes 0 }}
+// TestBodyLimit proves soapgen.yaml max_body_bytes reached the HTTP layer:
+// Huma answers 413 before decoding when the body exceeds the operation limit,
+// so a body larger than Huma's own 1 MiB default must get past that check
+// (the payload below is not a valid request, so it fails later, but never 413).
+func TestBodyLimit(t *testing.T) {
+	engine := gin.New()
+	humaAPI := humagin.New(engine, huma.DefaultConfig("generated-test", "1.0.0"))
+	Register(humaAPI, &Service{})
+
+	req := httptest.NewRequest(http.MethodPost, {{ quote (index .Operations 0).Path }}, strings.NewReader(strings.Repeat("x", 2*1024*1024)))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	engine.ServeHTTP(rec, req)
+	if rec.Code == http.StatusRequestEntityTooLarge {
+		t.Fatalf("POST %s with a 2 MiB body = %d, want the configured max_body_bytes (%d)", {{ quote (index .Operations 0).Path }}, rec.Code, {{ .Config.MaxBodyBytes }})
+	}
+}
+{{- end }}
 func TestOpenAPI(t *testing.T) {
 	engine := gin.New()
 	humaAPI := humagin.New(engine, huma.DefaultConfig("generated-test", "1.0.0"))

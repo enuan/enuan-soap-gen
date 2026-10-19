@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/enuan/enuan-soap-gen/internal/config"
@@ -249,6 +250,7 @@ func checkAPI(r *Report, cfg *config.Config, root string, ops []string) {
 
 	// One huma.Register per selected operation, with unique operation IDs.
 	registered := map[string]bool{}
+	bodyLimits := map[string]int64{}
 	ast.Inspect(file, func(n ast.Node) bool {
 		call, ok := n.(*ast.CallExpr)
 		if !ok {
@@ -265,18 +267,33 @@ func checkAPI(r *Report, cfg *config.Config, root string, ops []string) {
 		if !ok {
 			return true
 		}
+		opID := ""
+		var maxBody int64
 		for _, elt := range lit.Elts {
 			kv, ok := elt.(*ast.KeyValueExpr)
 			if !ok {
 				continue
 			}
 			key, ok := kv.Key.(*ast.Ident)
-			if !ok || key.Name != "OperationID" {
+			if !ok {
 				continue
 			}
-			if bl, ok := kv.Value.(*ast.BasicLit); ok {
-				registered[strings.Trim(bl.Value, `"`)] = true
+			switch key.Name {
+			case "OperationID":
+				if bl, ok := kv.Value.(*ast.BasicLit); ok {
+					opID = strings.Trim(bl.Value, `"`)
+				}
+			case "MaxBodyBytes":
+				if bl, ok := kv.Value.(*ast.BasicLit); ok {
+					if v, err := strconv.ParseInt(bl.Value, 10, 64); err == nil {
+						maxBody = v
+					}
+				}
 			}
+		}
+		if opID != "" {
+			registered[opID] = true
+			bodyLimits[opID] = maxBody
 		}
 		return true
 	})
@@ -288,6 +305,28 @@ func checkAPI(r *Report, cfg *config.Config, root string, ops []string) {
 			r.Add("api/register/"+op, OK, "Huma operation registered")
 		} else {
 			r.Add("api/register/"+op, Fail, "no huma.Register for the operation")
+		}
+	}
+
+	// Body limit: Huma applies its own 1 MiB default to every operation that
+	// leaves MaxBodyBytes unset, so a configured max_body_bytes must reach every
+	// huma.Register or large payloads start failing with 413 again.
+	if cfg.MaxBodyBytes != 0 {
+		var wrong []string
+		for _, op := range ops {
+			if !cfg.Included(op) {
+				continue
+			}
+			id := lowerFirst(op)
+			if bodyLimits[id] != cfg.MaxBodyBytes {
+				wrong = append(wrong, fmt.Sprintf("%s=%d", id, bodyLimits[id]))
+			}
+		}
+		if len(wrong) > 0 {
+			sort.Strings(wrong)
+			r.Add("api/max_body_bytes", Fail, "want %d on every operation, got %s", cfg.MaxBodyBytes, strings.Join(wrong, ", "))
+		} else {
+			r.Add("api/max_body_bytes", OK, "request body limit %d on every operation", cfg.MaxBodyBytes)
 		}
 	}
 }

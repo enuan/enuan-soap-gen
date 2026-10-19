@@ -16,7 +16,9 @@ import (
 // stack is hard-wired to the enuan fork; there is no soapgen.yaml knob.
 const SoapGoModule = "github.com/enuan/soap-go"
 
-// Config is the soapgen.yaml document.
+// Config is the soapgen.yaml document. max_body_bytes is a generation-time
+// knob (Huma exposes the request-body limit per operation, so it is baked into
+// operations_gen.go); verify checks that it reaches every huma.Register.
 type Config struct {
 	Service        string     `yaml:"service"`
 	WSDL           string     `yaml:"wsdl"`
@@ -31,6 +33,7 @@ type Config struct {
 	ConfigPath     string     `yaml:"config_path"`
 	TimeoutSeconds int        `yaml:"timeout_seconds"`
 	DefaultRetries int        `yaml:"default_retries"`
+	MaxBodyBytes   int64      `yaml:"max_body_bytes"` // 0 = Huma default (1 MiB), -1 = unlimited
 	Operations     Operations `yaml:"operations"`
 	Auth           Auth       `yaml:"auth"`
 	ErrorMap       ErrorMap   `yaml:"error_map"`
@@ -283,6 +286,9 @@ func (c *Config) Validate() error {
 	}
 	if c.Auth.Strategy == "header" && c.Auth.Header == "" {
 		return fmt.Errorf("auth.header is required when auth.strategy=header")
+	}
+	if c.MaxBodyBytes < -1 {
+		return fmt.Errorf("max_body_bytes %d is not valid (bytes, or -1 for unlimited)", c.MaxBodyBytes)
 	}
 	if c.ErrorMap.State.SuccessField == "" && (c.ErrorMap.State.CodeField != "" || c.ErrorMap.State.MessageField != "") {
 		return fmt.Errorf("error_map.state.success_field is required when code_field or message_field are set")

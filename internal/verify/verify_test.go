@@ -37,8 +37,14 @@ error_map:
 // generate emits the tagliandi gateway into a temp dir.
 func generate(t *testing.T) (*config.Config, string) {
 	t.Helper()
+	return generateWith(t, "")
+}
+
+// generateWith is generate plus extra soapgen.yaml keys.
+func generateWith(t *testing.T, extra string) (*config.Config, string) {
+	t.Helper()
 	root := t.TempDir()
-	yaml := strings.Replace(tagliandiYAML, "%WS", testutil.CorpusPath(t, "tagliandi"), 1)
+	yaml := strings.Replace(tagliandiYAML, "%WS", testutil.CorpusPath(t, "tagliandi"), 1) + extra
 	cfgPath := filepath.Join(root, "soapgen.yaml")
 	if err := os.WriteFile(cfgPath, []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
@@ -184,6 +190,29 @@ func TestRunSkipsUnselectedOperations(t *testing.T) {
 			t.Errorf("unselected operation was checked: %+v", c)
 		}
 	}
+}
+
+// TestBodyLimitWiring: max_body_bytes must reach every huma.Register, and the
+// verifier must notice when it does not (Huma would silently fall back to its
+// own 1 MiB default and large payloads would go back to 413).
+func TestBodyLimitWiring(t *testing.T) {
+	cfg, root := generateWith(t, "max_body_bytes: 16777216\n")
+	hasCheck(t, run(t, cfg), "api/max_body_bytes", verify.OK)
+
+	path := filepath.Join(root, cfg.APIDir, "operations_gen.go")
+	lines := strings.Split(read(t, path), "\n")
+	kept := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if strings.Contains(line, "MaxBodyBytes:") {
+			continue
+		}
+		kept = append(kept, line)
+	}
+	if len(kept) == len(lines) {
+		t.Fatal("operations_gen.go carries no MaxBodyBytes to remove")
+	}
+	write(t, path, strings.Join(kept, "\n"))
+	hasCheck(t, run(t, cfg), "api/max_body_bytes", verify.Fail)
 }
 
 func render(t *testing.T, report *verify.Report) string {

@@ -64,6 +64,13 @@ enuan-soap-gen verify --config soapgen.yaml --json      # machine readable
 Every operation becomes `POST /api/<camelCaseOperation>` (configurable through
 `operations.http`); SOAP faults map to `502`, timeouts to `504`.
 
+Request bodies are capped by `max_body_bytes` (see below). Without the knob,
+Huma's own default applies: **1 MiB**, which is too small for gateways that
+forward payloads carrying e-mail HTML or attachments (the UVET GBT ChatService
+gateway sets 16 MiB). The limit is a generation-time knob because Huma exposes
+it per operation, not globally; `verify` fails if a configured limit is missing
+from any `huma.Register`.
+
 ### `soapgen.yaml`
 
 ```yaml
@@ -71,6 +78,7 @@ service: rtws
 wsdl: wsdl/rtservice.wsdl
 module: github.com/enuan/infocar-rtws-go
 base_path: /api
+max_body_bytes: 16777216           # request body limit per operation; unset = Huma's 1 MiB, -1 = unlimited
 soap_bin: ""              # empty: go run github.com/enuan/soap-go/cmd/soap
 operations:
   include: [Login, GetVersion]     # empty = all

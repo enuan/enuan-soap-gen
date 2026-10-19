@@ -33,6 +33,9 @@ func Register(api huma.API, svc *Service) {
 		Description: {{ quote .Description }},
 		Tags:        []string{ {{ quote $.Config.Service }} },
 		Errors:      []int{502, 504},
+{{- if ne $.Config.MaxBodyBytes 0 }}
+		MaxBodyBytes: {{ $.Config.MaxBodyBytes }},
+{{- end }}
 {{- if .Operation.SOAPAction }}
 		Extensions: map[string]any{"x-soap-action": {{ quote .Operation.SOAPAction }}},
 {{- end }}

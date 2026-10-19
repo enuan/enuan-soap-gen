@@ -73,3 +73,29 @@ func TestCmdDirKeepsGatewayName(t *testing.T) {
 		})
 	}
 }
+
+// TestMaxBodyBytes: the request-body limit is a generation-time knob. Unset
+// means "let Huma decide" (its own 1 MiB default), -1 means unlimited, and
+// anything below -1 is rejected at load time.
+func TestMaxBodyBytes(t *testing.T) {
+	cases := []struct {
+		name string
+		yaml string
+		want int64
+	}{
+		{"unset keeps Huma default", "", 0},
+		{"bytes", "max_body_bytes: 16777216\n", 16777216},
+		{"unlimited", "max_body_bytes: -1\n", -1},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := load(t, tc.yaml).MaxBodyBytes; got != tc.want {
+				t.Errorf("MaxBodyBytes = %d, want %d", got, tc.want)
+			}
+		})
+	}
+
+	if _, err := loadErr(t, "max_body_bytes: -2\n"); err == nil {
+		t.Error("max_body_bytes: -2 was accepted, want a validation error")
+	}
+}

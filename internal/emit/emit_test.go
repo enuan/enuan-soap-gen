@@ -152,6 +152,38 @@ func TestRunChatService(t *testing.T) {
 	}
 }
 
+// TestRunMaxBodyBytes: soapgen.yaml max_body_bytes is baked into every
+// huma.Register (Huma only exposes the limit per operation); when the knob is
+// unset the generated code sets nothing and Huma keeps its own 1 MiB default.
+func TestRunMaxBodyBytes(t *testing.T) {
+	yaml := "service: chat_service\n" +
+		"wsdl: " + testutil.CorpusPath(t, "chat_service") + "\n" +
+		"module: example.com/chat-service-gw\n" +
+		"gateway: chat-service-gateway\n" +
+		"max_body_bytes: 16777216\n"
+
+	root := t.TempDir()
+	cfg, m := projectConfig(t, root, yaml)
+	if _, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m}); err != nil {
+		t.Fatalf("emit.Run: %v", err)
+	}
+	ops := readFile(t, filepath.Join(root, cfg.APIDir, "operations_gen.go"))
+	registers := strings.Count(ops, "huma.Register(api, huma.Operation{")
+	if got := strings.Count(ops, "MaxBodyBytes: 16777216,"); got != registers || registers == 0 {
+		t.Errorf("max_body_bytes on %d/%d operations\n%s", got, registers, ops)
+	}
+
+	root = t.TempDir()
+	cfg, m = project(t, root, "chat_service")
+	if _, err := emit.Run(emit.Options{Root: root, Config: cfg, Model: m}); err != nil {
+		t.Fatalf("emit.Run: %v", err)
+	}
+	ops = readFile(t, filepath.Join(root, cfg.APIDir, "operations_gen.go"))
+	if strings.Contains(ops, "MaxBodyBytes") {
+		t.Error("operations_gen.go sets MaxBodyBytes although max_body_bytes is unset")
+	}
+}
+
 // TestRunSchemaDocs renders a fixture whose WSDL carries documentation and
 // XSD facets, and checks they are emitted as DTO field tags.
 func TestRunSchemaDocs(t *testing.T) {
